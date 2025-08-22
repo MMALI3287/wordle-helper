@@ -1,21 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: 'JetBrains Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: "JetBrains Mono", source-code-pro, Menlo, Monaco, Consolas,
+    "Courier New", monospace;
 }
 
 /* Interaction-based animations only */
@@ -46,7 +46,8 @@ code {
 }
 
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.5));
   }
   50% {
@@ -85,15 +86,18 @@ code {
 
 /* Typography improvements */
 * {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
 }
 
 .font-mono {
-  font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace !important;
+  font-family: "JetBrains Mono", "Fira Code", "Consolas", monospace !important;
 }
 
-h1, h2, h3 {
-  font-family: 'Poppins', 'Inter', sans-serif;
+h1,
+h2,
+h3 {
+  font-family: "Poppins", "Inter", sans-serif;
   font-weight: 700;
   letter-spacing: -0.025em;
 }
@@ -107,16 +111,16 @@ html {
 
 /* Enhanced interaction-based animations - only trigger on user actions */
 @keyframes dropIn {
-  0% { 
-    opacity: 0; 
-    transform: translateY(-20px) scale(0.9); 
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
   }
-  50% { 
-    transform: translateY(5px) scale(1.05); 
+  50% {
+    transform: translateY(5px) scale(1.05);
   }
-  100% { 
-    opacity: 1; 
-    transform: translateY(0) scale(1); 
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -178,11 +182,13 @@ html {
 
 /* Only use glow for active/interactive elements */
 @keyframes glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
   }
   50% {
-    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), 0 0 40px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6),
+      0 0 40px rgba(59, 130, 246, 0.4);
   }
 }
 
@@ -274,7 +280,8 @@ html {
 
 /* Enhanced pulse animation for loading indicators */
 @keyframes pulse-smooth {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
