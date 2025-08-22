@@ -1,9 +1,118 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { matchesConstraints, getBestStartingWords, calculateAllEntropies } from './entropy';
-import { getWordsForLength } from './dictionaryAPI';
+import { getBestStartingWords } from './bestStartingWords';
+import { entropyWorker, EntropyResult } from './entropyWorker';
 import './App.css';
+
+// Consolidated word loading system - single cache layer with performance optimizations
+const wordCache = new Map<number, string[]>();
+const loadingStates = new Map<number, Promise<string[]>>();
+
+const loadWordsForLength = async (length: number): Promise<string[]> => {
+  // Return cached words if available
+  if (wordCache.has(length)) {
+    console.log(`✅ Using cached ${length}-letter words (${wordCache.get(length)!.length} words)`);
+    return wordCache.get(length)!;
+  }
+
+  // Return existing loading promise if already loading
+  if (loadingStates.has(length)) {
+    console.log(`⏳ Waiting for existing ${length}-letter words load...`);
+    return loadingStates.get(length)!;
+  }
+
+  // Start new loading process with performance optimizations
+  const loadPromise = (async () => {
+    try {
+      console.log(`🔄 Loading ${length}-letter words with optimizations...`);
+      const startTime = performance.now();
+      
+      // Fetch with compression and timeout optimizations
+      const response = await fetch(`/words_${length}_letters.json`, {
+        headers: {
+          'Accept-Encoding': 'gzip, deflate, br', // Request compression
+          'Cache-Control': 'max-age=3600' // Cache for 1 hour
+        },
+        // Add timeout to prevent hanging
+        signal: AbortSignal.timeout(30000) // 30 second timeout
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to load ${length}-letter words: ${response.statusText}`);
+      }
+      
+      const fetchTime = performance.now() - startTime;
+      console.log(`📡 Fetch completed in ${fetchTime.toFixed(2)}ms`);
+      
+      // Parse JSON with performance measurement
+      const parseStart = performance.now();
+      const words: string[] = await response.json();
+      const parseTime = performance.now() - parseStart;
+      
+      console.log(`📊 JSON parse completed in ${parseTime.toFixed(2)}ms`);
+      console.log(`📋 Total loading time: ${(fetchTime + parseTime).toFixed(2)}ms for ${words.length} words`);
+      console.log(`🚀 Average: ${((fetchTime + parseTime) / words.length).toFixed(4)}ms per word`);
+      
+      wordCache.set(length, words);
+      loadingStates.delete(length); // Clean up loading state
+      console.log(`✅ Loaded ${words.length} words of length ${length}`);
+      return words;
+    } catch (error) {
+      console.error(`❌ Error loading ${length}-letter words:`, error);
+      loadingStates.delete(length); // Clean up loading state
+      return [];
+    }
+  })();
+
+  loadingStates.set(length, loadPromise);
+  return loadPromise;
+};
+
+// Optimized word filtering - will be moved to WebAssembly worker
+const filterWords = (
+  words: string[],
+  knownPositions: string[],
+  yellowLetters: Array<{ letter: string; excludedPositions: number[] }>,
+  grayLetters: string[]
+): string[] => {
+  return words.filter(word => {
+    const upperWord = word.toUpperCase();
+
+    // Check if word matches known positions (green letters)
+    for (let i = 0; i < knownPositions.length; i++) {
+      if (knownPositions[i] && upperWord[i] !== knownPositions[i]) {
+        return false;
+      }
+    }
+
+    // Check if word contains yellow letters but not in excluded positions
+    for (const { letter, excludedPositions } of yellowLetters) {
+      const upperLetter = letter.toUpperCase();
+
+      // Word must contain the letter
+      if (!upperWord.includes(upperLetter)) {
+        return false;
+      }
+
+      // Letter must not be in any of the excluded positions
+      for (const position of excludedPositions) {
+        if (upperWord[position] === upperLetter) {
+          return false;
+        }
+      }
+    }
+
+    // Check if word contains any gray letters
+    for (const grayLetter of grayLetters) {
+      if (upperWord.includes(grayLetter.toUpperCase())) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+};
 
 const ITEM_TYPE = 'LETTER';
 
@@ -38,12 +147,12 @@ function LetterCard({ letter, backgroundColor = 'bg-slate-700/50 backdrop-blur-s
     >
       {/* Glowing border effect */}
       <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
-      
+
       {/* Letter with subtle glow */}
       <span className="relative z-10 drop-shadow-lg group-hover:drop-shadow-2xl transition-all duration-300">
         {letter}
       </span>
-      
+
       {/* Shimmer effect on hover */}
       <div className="absolute inset-0 -top-full bg-gradient-to-b from-transparent via-white/20 to-transparent skew-y-12 group-hover:top-full transition-all duration-700 ease-out"></div>
     </div>
@@ -75,138 +184,134 @@ function DropZone({ onDrop, children, position }: DropZoneProps) {
 function App() {
   const [wordLength, setWordLength] = useState<number>(5);
   const [words, setWords] = useState<string[]>([]);
-  const [isLoadingWords, setIsLoadingWords] = useState(false);
+  const [wordsLoadingStatus, setWordsLoadingStatus] = useState<string>('');
   const [knownPositions, setKnownPositions] = useState<string[]>(new Array(wordLength).fill(''));
-  const [yellowLetters, setYellowLetters] = useState<Array<{letter: string, excludedPositions: number[]}>>([]);
+  const [yellowLetters, setYellowLetters] = useState<Array<{ letter: string, excludedPositions: number[] }>>([]);
   const [grayLetters, setGrayLetters] = useState<string[]>([]);
-  
-  // Animation states for interaction-based animations only
-  const [animatingLetters, setAnimatingLetters] = useState<Set<string>>(new Set());
-  const [isCalculatingFiltered, setIsCalculatingFiltered] = useState(false);
+
+  // New state for Web Worker integration
+  const [entropyResults, setEntropyResults] = useState<EntropyResult[]>([]);
   const [isCalculatingEntropy, setIsCalculatingEntropy] = useState(false);
 
-  // Combined calculating state for the indicator
-  const isCalculating = isCalculatingFiltered || isCalculatingEntropy;
 
-  // Load words when word length changes - now async and non-blocking
+
+  // Animation states for interaction-based animations only
+  const [animatingLetters, setAnimatingLetters] = useState<Set<string>>(new Set());
+
+  // Combined calculating state for the indicator
+  const isCalculating = isCalculatingEntropy;
+
+  // Load words when word length changes - now truly async and non-blocking
   useEffect(() => {
     const loadWords = async () => {
-      setIsLoadingWords(true);
-      console.log(`🔄 Loading ${wordLength}-letter words...`);
-      
+      setWordsLoadingStatus(`Loading ${wordLength}-letter words...`);
+      console.log(`🔄 Background loading ${wordLength}-letter words...`);
+
       try {
-        // This now returns immediately with available words or waits for database to load
-        const newWords = await getWordsForLength(wordLength);
-        console.log(`✅ Loaded ${newWords.length} words of length ${wordLength}`);
+        // Start loading words in background - UI remains interactive
+        const newWords = await loadWordsForLength(wordLength);
+        console.log(`✅ Background loaded ${newWords.length} words of length ${wordLength}`);
         setWords(newWords);
-        
+        setWordsLoadingStatus('');
+
+        // Initialize worker with word list for entropy calculations (when needed)
+        if (newWords.length > 0) {
+          await entropyWorker.setWordLists(newWords, newWords);
+        }
+
       } catch (error) {
         console.error('❌ Error loading words:', error);
         setWords([]);
-      } finally {
-        setIsLoadingWords(false);
+        setWordsLoadingStatus('Failed to load words');
       }
     };
-    
+
     loadWords();
     setKnownPositions(new Array(wordLength).fill(''));
-  }, [wordLength]);
-
-  // Calculate filtered words with background processing to prevent UI freezing
+  }, [wordLength]);  // Removed showLoading, hideLoading - no blocking UI  // Simple word filtering - instant results
   const filteredWords = useMemo(() => {
-    setIsCalculatingFiltered(true);
-    
-    console.log('=== FILTERING DEBUG ===');
-    console.log('Total words available:', words.length);
-    console.log('Known positions:', knownPositions);
-    console.log('Yellow letters (with excluded positions):', yellowLetters);
-    console.log('Gray letters:', grayLetters);
-    
-    // Manual test for specific pattern: _A__Y with T(≠pos2) and O(≠pos3), no L,E,S
-    const testWords = ['PARTY', 'FORTY', 'HASTY', 'TASTY', 'NATTY', 'PATTY', 'RATTY', 'CATTY', 'BATTY', 'FATTY', 'SALTY', 'MALTY', 'DUSTY', 'RUSTY'];
-    console.log('=== MANUAL PATTERN TEST ===');
-    testWords.forEach(word => {
-      const matches = matchesConstraints(word, knownPositions, yellowLetters, grayLetters);
-      console.log(`Testing "${word}": ${matches ? '✅ MATCH' : '❌ NO MATCH'}`);
-      
-      // Detailed breakdown for debugging
-      if (!matches) {
-        console.log(`  - Position check: A in pos 2? ${word[1] === 'A'}, Y in pos 5? ${word[4] === 'Y'}`);
-        console.log(`  - Contains T? ${word.includes('T')}, Contains O? ${word.includes('O')}`);
-        console.log(`  - T not in pos 2? ${!word[1] || word[1] !== 'T'}, O not in pos 3? ${!word[2] || word[2] !== 'O'}`);
-        console.log(`  - No L,E,S? ${!word.includes('L') && !word.includes('E') && !word.includes('S')}`);
-      }
+    console.log(`🔍 Filtering ${words.length} words with constraints:`, {
+      knownPositions: knownPositions.map((pos, i) => pos ? `${i + 1}:${pos}` : null).filter(Boolean),
+      yellowLetters: yellowLetters.map(y => `${y.letter}(not in ${y.excludedPositions.map(p => p + 1).join(',')})`),
+      grayLetters
     });
-    
-    const result = words.filter((word: string) => {
-      const matches = matchesConstraints(word, knownPositions, yellowLetters, grayLetters);
-      return matches;
-    });
-    
-    console.log('Filtered words result:', result.length, 'words');
-    console.log('First 20 matches:', result.slice(0, 20));
-    
-    // Use setTimeout to ensure the calculating indicator shows
-    setTimeout(() => setIsCalculatingFiltered(false), 50);
-    
+    const result = filterWords(words, knownPositions, yellowLetters, grayLetters);
+    console.log(`✅ Found ${result.length} matching words:`, result.slice(0, 5));
     return result;
   }, [words, knownPositions, yellowLetters, grayLetters]);
 
-  // Calculate entropy-sorted suggestions - removed all constraints
-  const entropyCalculations = useMemo(() => {
-    // Debug logging 
-    console.log('Entropy Calculation Debug:', {
-      isLoadingWords,
-      filteredWordsLength: filteredWords.length,
-      wordsLength: words.length,
-      knownPositions: knownPositions.filter(p => p !== ''),
-      yellowLetters: yellowLetters.map(y => `${y.letter} (not in positions ${y.excludedPositions.map(p => p + 1).join(', ')})`),
-      grayLetters
-    });
+  // Calculate entropy-sorted suggestions using Web Worker - ONLY when user has constraints
+  useEffect(() => {
+    const calculateEntropyAsync = async () => {
+      // Only calculate if we have constraints (user has started guessing)
+      const hasConstraints = knownPositions.some(pos => pos !== '') ||
+        yellowLetters.length > 0 ||
+        grayLetters.length > 0;
+
+      if (!hasConstraints) {
+        // No constraints = show starting words, no entropy calculation needed
+        setEntropyResults([]);
+        setIsCalculatingEntropy(false);
+        console.log('🎯 No constraints - showing starting words instead of calculating entropy');
+        return;
+      }
+
+      if (words.length === 0 || filteredWords.length === 0) {
+        setEntropyResults([]);
+        setIsCalculatingEntropy(false);
+        return;
+      }
+
+      try {
+        setIsCalculatingEntropy(true);
+        console.log('🚀 Starting BACKGROUND Web Worker entropy calculation (user has constraints)');
+
+        // Use filtered words as possible answers and calculate entropy for all words
+        const possibleAnswers = filteredWords.length > 0 ? filteredWords : words;
+        
+        // Send word lists to worker
+        await entropyWorker.setWordLists(words, possibleAnswers);
+        
+        // Calculate entropy for all words
+        const results = await entropyWorker.calculateAllEntropies(words, possibleAnswers);
+        
+        // Take top 20 results
+        setEntropyResults(results.slice(0, 20));
+        
+        console.log('✅ BACKGROUND Web Worker entropy calculation completed:', results.length, 'results');
+        
+      } catch (error) {
+        console.error('❌ Error in Web Worker entropy calculation:', error);
+        setEntropyResults([]);
+      } finally {
+        setIsCalculatingEntropy(false);
+      }
+    };
+
+    // Debounce calculations to avoid excessive computation
+    const timeoutId = setTimeout(calculateEntropyAsync, 300);
     
-    // Only skip if words are still loading or we have no words at all
-    if (isLoadingWords || words.length === 0) {
-      setIsCalculatingEntropy(false);
-      return [];
-    }
-    
-    setIsCalculatingEntropy(true);
-    console.log('Starting entropy calculations for', filteredWords.length, 'filtered words');
-    
-    try {
-      // Use filtered words as possible answers and calculate entropy for all words
-      // If no constraints, use all words as possible answers
-      const possibleAnswers = filteredWords.length > 0 ? filteredWords : words;
-      const result = calculateAllEntropies(words, possibleAnswers).slice(0, 20);
-      console.log('Entropy calculations completed, found', result.length, 'suggestions');
-      
-      // Use setTimeout to ensure the calculating indicator shows for entropy calculations
-      setTimeout(() => setIsCalculatingEntropy(false), 100);
-      
-      return result;
-    } catch (error) {
-      console.error('Error calculating entropy:', error);
-      setIsCalculatingEntropy(false);
-      return [];
-    }
-  }, [words, filteredWords, knownPositions, yellowLetters, grayLetters, isLoadingWords]);
+    return () => clearTimeout(timeoutId);
+  }, [words, filteredWords, knownPositions, yellowLetters, grayLetters]);
 
   // Simple game state
   const isGameWon = filteredWords.length === 1;
 
-  // Get starting word suggestions - always show when no constraints
+  // Get starting word suggestions - ALWAYS show when no constraints
   const startingWordSuggestions = useMemo(() => {
-    const hasConstraints = knownPositions.some(pos => pos !== '') || 
-                          yellowLetters.length > 0 || 
-                          grayLetters.length > 0;
-    
+    const hasConstraints = knownPositions.some(pos => pos !== '') ||
+      yellowLetters.length > 0 ||
+      grayLetters.length > 0;
+
     // Only show starting words when there are no constraints
-    if (hasConstraints || isLoadingWords) {
+    if (hasConstraints) {
       return [];
     }
-    
-    return getBestStartingWords();
-  }, [knownPositions, yellowLetters, grayLetters, isLoadingWords]);
+
+    // Get pre-computed starting words for current word length
+    console.log(`🎯 Showing pre-computed starting words for ${wordLength}-letter words`);
+    return getBestStartingWords(wordLength);
+  }, [wordLength, knownPositions, yellowLetters, grayLetters]);
 
   // Enhanced animation helpers for interaction-based animations
   const triggerLetterAnimation = (letterKey: string) => {
@@ -229,9 +334,9 @@ function App() {
         const newPositions = sourcePosition !== undefined && !currentPositions.includes(sourcePosition)
           ? [...currentPositions, sourcePosition]
           : currentPositions;
-        
-        const updatedItem = { 
-          ...prev[existingIndex], 
+
+        const updatedItem = {
+          ...prev[existingIndex],
           excludedPositions: newPositions
         };
         const newArray = [...prev];
@@ -241,9 +346,9 @@ function App() {
       } else {
         // Create new entry
         triggerLetterAnimation(`yellow-${letter}-${sourcePosition}`);
-        return [...prev, { 
-          letter, 
-          excludedPositions: sourcePosition !== undefined ? [sourcePosition] : [] 
+        return [...prev, {
+          letter,
+          excludedPositions: sourcePosition !== undefined ? [sourcePosition] : []
         }];
       }
     });
@@ -262,8 +367,9 @@ function App() {
   const addToPosition = useCallback((letter: string, position: number) => {
     setKnownPositions(prev => {
       const newPositions = [...prev];
-      newPositions[position] = letter;
+      newPositions[position] = letter.toUpperCase(); // Ensure uppercase
       triggerLetterAnimation(`position-${position}-${letter}`);
+      console.log('🎯 Added to position', position + 1, ':', letter.toUpperCase(), 'Full array:', newPositions);
       return newPositions;
     });
   }, []);
@@ -293,9 +399,26 @@ function App() {
         {/* Cosmic background effects */}
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(120,119,198,0.3),transparent_50%)]"></div>
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(236,72,153,0.2),transparent_50%)]"></div>
-        
+
+        {/* Subtle background processing indicator - only when calculating entropy */}
+        {isCalculatingEntropy && (
+          <div className="fixed bottom-4 right-4 z-50 bg-blue-600 text-white px-3 py-1 rounded-full text-sm shadow-lg opacity-80">
+            🧠 Calculating...
+          </div>
+        )}
+
+        {/* Remove the blocking loading screen - words load in background */}
+
         <div className="relative z-10 max-w-[2200px] mx-auto px-4 py-8">
-          
+
+          {/* Word Loading Status - Non-blocking indicator */}
+          {wordsLoadingStatus && (
+            <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-40 backdrop-blur-xl bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 border border-blue-400/30 rounded-2xl px-4 py-2 flex items-center space-x-2 shadow-xl animate-fadeIn">
+              <div className="w-4 h-4 border-2 border-blue-400/30 border-t-blue-400 rounded-full animate-spin"></div>
+              <span className="text-blue-200 text-sm font-medium">{wordsLoadingStatus}</span>
+            </div>
+          )}
+
           {/* Calculating Indicator at Top */}
           {isCalculating && (
             <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-indigo-500/20 border border-purple-400/30 rounded-2xl px-6 py-3 flex items-center space-x-3 shadow-2xl animate-fadeIn">
@@ -310,12 +433,12 @@ function App() {
               </div>
               <div className="flex space-x-1">
                 <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+                <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
               </div>
             </div>
           )}
-          
+
           {/* Top Header Row - Wordle Helper left, Word Length Selector right */}
           <div className="flex justify-between items-center mb-8">
             {/* Wordle Helper Title - Left */}
@@ -340,7 +463,7 @@ function App() {
                     Word Length
                   </h2>
                 </div>
-                
+
                 <div className="relative w-48">
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-xl blur-xl"></div>
                   <div className="relative backdrop-blur-lg bg-white/10 border border-indigo-300/30 rounded-xl overflow-hidden">
@@ -349,9 +472,8 @@ function App() {
                       value={wordLength}
                       onChange={(e) => setWordLength(Number(e.target.value))}
                       className="w-full px-4 py-2 bg-transparent text-white font-semibold appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-purple-400/50 relative z-10"
-                      disabled={isLoadingWords}
                     >
-                      {[3, 4, 5, 6, 7, 8].map(length => (
+                      {[3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(length => (
                         <option key={length} value={length} className="bg-slate-800 text-white">
                           {length} letters
                         </option>
@@ -365,11 +487,6 @@ function App() {
                       </div>
                     </div>
                   </div>
-                  {isLoadingWords && (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin"></div>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -420,7 +537,7 @@ function App() {
                     Drop letters in the position slots where they are NOT located
                   </p>
                 </div>
-                
+
                 {/* Position-specific drop zones for yellow letters */}
                 <div className="flex justify-center gap-2 mb-4">
                   {Array.from({ length: wordLength }, (_, index) => (
@@ -434,17 +551,16 @@ function App() {
                     </div>
                   ))}
                 </div>
-                
+
                 {/* Display current yellow letters with their excluded positions */}
                 <div className="flex flex-wrap gap-3 justify-center">
                   {yellowLetters.map((letterInfo, index) => (
                     <div
                       key={`${letterInfo.letter}-${index}`}
-                      className={`${
-                        animatingLetters.has(`yellow-${letterInfo.letter}`) 
-                          ? 'animate-dropIn' 
+                      className={`${animatingLetters.has(`yellow-${letterInfo.letter}`)
+                          ? 'animate-dropIn'
                           : 'animate-fadeIn'
-                      }`}
+                        }`}
                       style={{ animationDelay: `${index * 100}ms` }}
                       title={`${letterInfo.letter} - Not in positions: ${letterInfo.excludedPositions.map(p => p + 1).join(', ')}`}
                     >
@@ -487,11 +603,10 @@ function App() {
                     {grayLetters.map((letter, index) => (
                       <div
                         key={`${letter}-${index}`}
-                        className={`${
-                          animatingLetters.has(`gray-${letter}`) 
-                            ? 'animate-dropIn' 
+                        className={`${animatingLetters.has(`gray-${letter}`)
+                            ? 'animate-dropIn'
                             : 'animate-fadeIn'
-                        }`}
+                          }`}
                         style={{ animationDelay: `${index * 100}ms` }}
                       >
                         <LetterCard
@@ -533,10 +648,9 @@ function App() {
               <div className="flex justify-center gap-2 md:gap-3">
                 {knownPositions.map((letter, index) => (
                   <DropZone key={index} onDrop={(droppedLetter) => addToPosition(droppedLetter, index)}>
-                    <div 
-                      className={`w-12 h-12 md:w-14 md:h-14 border-2 border-emerald-400/30 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center text-lg md:text-xl font-bold text-emerald-200 hover:border-emerald-400/60 transition-all duration-300 backdrop-blur-sm relative ${
-                        animatingLetters.has(`position-${index}-${letter}`) ? 'animate-dropIn' : ''
-                      }`}
+                    <div
+                      className={`w-12 h-12 md:w-14 md:h-14 border-2 border-emerald-400/30 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center text-lg md:text-xl font-bold text-emerald-200 hover:border-emerald-400/60 transition-all duration-300 backdrop-blur-sm relative ${animatingLetters.has(`position-${index}-${letter}`) ? 'animate-dropIn' : ''
+                        }`}
                       onContextMenu={(e) => {
                         e.preventDefault();
                         if (letter) {
@@ -562,25 +676,31 @@ function App() {
           </div>
 
           {/* CRITICAL: Calculated Words Sorted by Information Bits - Always Show When Available */}
-          {entropyCalculations.length > 0 && (
-            <div className="backdrop-blur-xl bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-purple-500/10 border border-violet-400/20 rounded-3xl shadow-2xl p-8 mb-6 relative overflow-hidden group hover:scale-[1.01] transition-all duration-500">
-              <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-fuchsia-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-              <div className="relative z-10">
-                <div className="flex items-center justify-center mb-8">
-                  <div className="w-16 h-16 bg-gradient-to-r from-violet-400 via-fuchsia-400 to-purple-400 rounded-2xl flex items-center justify-center text-3xl hover:scale-110 transition-transform duration-300">
-                    🧠
-                  </div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-300 via-fuchsia-300 to-purple-300 ml-4 tracking-wide font-['Inter']">
-                    Optimal Next Words
-                  </h2>
+          {(() => {
+            console.log('🎨 Render check - entropyResults.length:', entropyResults.length, 'Array:', entropyResults.slice(0, 2));
+            console.log('🎨 Words loaded:', words.length, 'Filtered words:', filteredWords.length);
+            return null;
+          })()}
+          {/* TEMP: Always show section for debugging */}
+          <div className="backdrop-blur-xl bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-purple-500/10 border border-violet-400/20 rounded-3xl shadow-2xl p-8 mb-6 relative overflow-hidden group hover:scale-[1.01] transition-all duration-500">
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-fuchsia-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div className="relative z-10">
+              <div className="flex items-center justify-center mb-8">
+                <div className="w-16 h-16 bg-gradient-to-r from-violet-400 via-fuchsia-400 to-purple-400 rounded-2xl flex items-center justify-center text-3xl hover:scale-110 transition-transform duration-300">
+                  🧠
                 </div>
-                <div className="text-center mb-6">
-                  <p className="text-violet-200 text-lg leading-relaxed max-w-3xl mx-auto">
-                    Words ranked by information theory - higher bits = better choice
-                  </p>
-                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-300 via-fuchsia-300 to-purple-300 ml-4 tracking-wide font-['Inter']">
+                  Optimal Next Words (Debug: {entropyResults.length} words)
+                </h2>
+              </div>
+              <div className="text-center mb-6">
+                <p className="text-violet-200 text-lg leading-relaxed max-w-3xl mx-auto">
+                  Words ranked by information theory - higher bits = better choice
+                </p>
+              </div>
+              {entropyResults.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {entropyCalculations.map((calculation, index) => (
+                  {entropyResults.map((calculation: EntropyResult, index: number) => (
                     <div
                       key={index}
                       className="backdrop-blur-sm bg-white/10 border border-violet-300/20 rounded-2xl p-4 hover:shadow-xl hover:shadow-violet-500/25 hover:border-violet-300/40 transition-all duration-300 hover:scale-105 relative overflow-hidden group/card animate-fadeIn"
@@ -604,11 +724,15 @@ function App() {
                     </div>
                   ))}
                 </div>
-              </div>
+              ) : (
+                <div className="text-center text-violet-300">
+                  <p>No words calculated yet. Debug info: words={words.length}, filtered={filteredWords.length}</p>
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
-          {/* Starting Word Suggestions */}
+          {/* Starting Word Suggestions - Always show when no constraints */}
           {startingWordSuggestions.length > 0 && (
             <div className="backdrop-blur-xl bg-gradient-to-br from-purple-500/10 via-pink-500/10 to-violet-500/10 border border-purple-400/20 rounded-3xl shadow-2xl p-8 mb-6 relative overflow-hidden group hover:scale-[1.01] transition-all duration-500">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-600/5 via-pink-600/5 to-violet-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -618,8 +742,13 @@ function App() {
                     🎯
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-violet-300 ml-4 tracking-wide font-['Inter']">
-                    Optimal Starting Words
+                    Best Starting Words ({wordLength} Letters)
                   </h2>
+                </div>
+                <div className="text-center mb-6">
+                  <p className="text-purple-200 text-lg leading-relaxed max-w-3xl mx-auto">
+                    Pre-computed optimal starting words based on letter frequency and information theory
+                  </p>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                   {startingWordSuggestions.map((suggestion, index) => (
@@ -627,12 +756,25 @@ function App() {
                       key={index}
                       className="backdrop-blur-sm bg-white/10 border border-purple-300/20 rounded-2xl p-4 hover:shadow-xl hover:shadow-purple-500/25 hover:border-purple-300/40 transition-all duration-300 hover:scale-105 relative overflow-hidden group/card animate-fadeIn"
                       style={{ animationDelay: `${index * 100}ms` }}
+                      title={suggestion.description}
                     >
                       <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-pink-400/10 opacity-0 group-hover/card:opacity-100 transition-opacity duration-300"></div>
                       <div className="relative z-10">
                         <div className="font-mono font-black text-lg md:text-xl text-purple-200 mb-2 tracking-wider text-center">
                           {suggestion.word}
                         </div>
+                        {suggestion.entropy && (
+                          <div className="text-center">
+                            <div className="text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 to-pink-300">
+                              {suggestion.entropy} bits
+                            </div>
+                          </div>
+                        )}
+                        {suggestion.description && (
+                          <div className="text-xs text-purple-300/80 text-center mt-1">
+                            {suggestion.description}
+                          </div>
+                        )}
                       </div>
                       <div className="absolute inset-0 -left-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 group-hover/card:left-full transition-all duration-1000 ease-out"></div>
                     </div>
@@ -702,7 +844,7 @@ function App() {
             <div className="fixed bottom-6 right-6 backdrop-blur-xl bg-gradient-to-br from-purple-500/30 via-pink-500/30 to-indigo-500/30 border border-purple-400/40 rounded-2xl px-5 py-3 flex items-center space-x-3 shadow-2xl animate-fadeIn z-40">
               <div className="relative">
                 <div className="w-5 h-5 border-2 border-purple-400/30 border-t-purple-400 rounded-full animate-spin"></div>
-                <div className="absolute inset-0 w-5 h-5 border-2 border-pink-400/20 border-b-pink-400 rounded-full animate-spin" style={{animationDirection: 'reverse', animationDuration: '1.5s'}}></div>
+                <div className="absolute inset-0 w-5 h-5 border-2 border-pink-400/20 border-b-pink-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
               </div>
               <div className="flex flex-col">
                 <span className="text-purple-200 text-sm font-bold tracking-wide">
