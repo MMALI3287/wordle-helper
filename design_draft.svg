@@ -1,0 +1,159 @@
+<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="800" fill="#f8fafc"/>
+  
+  <!-- Title -->
+  <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#1f2937">Wordle Helper - Drag and Drop Interface</text>
+  
+  <!-- Three Main Boxes Section -->
+  <text x="600" y="80" text-anchor="middle" font-size="16" fill="#6b7280">Three Kanban-Style Boxes</text>
+  
+  <!-- Box 1: All Letters -->
+  <rect x="50" y="100" width="350" height="200" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="8"/>
+  <text x="225" y="120" text-anchor="middle" font-size="14" font-weight="bold" fill="#374151">All Letter Cards (Infinite Source)</text>
+  
+  <!-- Letter cards in first box showing alphabet grid -->
+  <g transform="translate(70, 140)">
+    <!-- Row 1: A-F -->
+    <rect x="0" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
+    <text x="17.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">A</text>
+    
+    <rect x="45" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
+    <text x="62.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">B</text>
+    
+    <rect x="90" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
+    <text x="107.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">C</text>
+    
+    <rect x="135" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
+    <text x="152.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">D</text>
+    
+    <rect x="180" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
+    <text x="197.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">E</text>
+    
+    <rect x="225" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
+    <text x="242.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">F</text>
+    
+    <!-- Row 2: G-L -->
+    <rect x="0" y="45" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
+    <text x="17.5" y="67" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">G</text>
+    
+    <rect x="45" y="45" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
+    <text x="62.5" y="67" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">H</text>
+    
+    <rect x="90" y="45" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
+    <text x="107.5" y="67" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">I</text>
+    
+    <text x="155" y="67" text-anchor="middle" font-size="12" fill="#6b7280">...etc (all 26 letters)</text>
+  </g>
+  
+  <!-- Box 2: Letters in Word (Yellow) -->
+  <rect x="425" y="100" width="350" height="200" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
+  <text x="600" y="120" text-anchor="middle" font-size="14" font-weight="bold" fill="#92400e">Letters in Word (Yellow Letters)</text>
+  <text x="600" y="140" text-anchor="middle" font-size="12" fill="#92400e">Drag letters that appear in word but wrong position</text>
+  
+  <!-- Example yellow letters -->
+  <rect x="450" y="160" width="35" height="35" fill="#fbbf24" stroke="#f59e0b" rx="4"/>
+  <text x="467.5" y="182" text-anchor="middle" font-size="16" font-weight="bold" fill="#92400e">R</text>
+  
+  <rect x="495" y="160" width="35" height="35" fill="#fbbf24" stroke="#f59e0b" rx="4"/>
+  <text x="512.5" y="182" text-anchor="middle" font-size="16" font-weight="bold" fill="#92400e">S</text>
+  
+  <!-- Box 3: Letters Not in Word (Gray) -->
+  <rect x="800" y="100" width="350" height="200" fill="#f3f4f6" stroke="#6b7280" stroke-width="2" rx="8"/>
+  <text x="975" y="120" text-anchor="middle" font-size="14" font-weight="bold" fill="#374151">Letters Not in Word (Gray Letters)</text>
+  <text x="975" y="140" text-anchor="middle" font-size="12" fill="#374151">Drag letters that do not appear in word</text>
+  
+  <!-- Example gray letters -->
+  <rect x="825" y="160" width="35" height="35" fill="#9ca3af" stroke="#6b7280" rx="4"/>
+  <text x="842.5" y="182" text-anchor="middle" font-size="16" font-weight="bold" fill="#374151">T</text>
+  
+  <rect x="870" y="160" width="35" height="35" fill="#9ca3af" stroke="#6b7280" rx="4"/>
+  <text x="887.5" y="182" text-anchor="middle" font-size="16" font-weight="bold" fill="#374151">N</text>
+  
+  <!-- Position Slots Section -->
+  <text x="600" y="350" text-anchor="middle" font-size="16" fill="#6b7280">Known Positions (Green Letters)</text>
+  
+  <!-- 5 position slots -->
+  <g transform="translate(450, 370)">
+    <!-- Position 1 -->
+    <rect x="0" y="0" width="50" height="50" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="6"/>
+    <text x="25" y="30" text-anchor="middle" font-size="12" fill="#6b7280">1</text>
+    
+    <!-- Position 2 -->
+    <rect x="60" y="0" width="50" height="50" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="6"/>
+    <text x="85" y="30" text-anchor="middle" font-size="12" fill="#6b7280">2</text>
+    
+    <!-- Position 3 with letter -->
+    <rect x="120" y="0" width="50" height="50" fill="#bbf7d0" stroke="#16a34a" stroke-width="2" rx="6"/>
+    <text x="145" y="35" text-anchor="middle" font-size="20" font-weight="bold" fill="#15803d">O</text>
+    
+    <!-- Position 4 -->
+    <rect x="180" y="0" width="50" height="50" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="6"/>
+    <text x="205" y="30" text-anchor="middle" font-size="12" fill="#6b7280">4</text>
+    
+    <!-- Position 5 -->
+    <rect x="240" y="0" width="50" height="50" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="6"/>
+    <text x="265" y="30" text-anchor="middle" font-size="12" fill="#6b7280">5</text>
+  </g>
+  
+  <!-- Word Suggestions Section -->
+  <text x="600" y="480" text-anchor="middle" font-size="16" fill="#6b7280">Word Suggestions (Entropy-Ranked)</text>
+  
+  <!-- Suggestions container -->
+  <rect x="200" y="500" width="800" height="220" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="8"/>
+  <text x="600" y="525" text-anchor="middle" font-size="14" font-weight="bold" fill="#1f2937">Matching Words - Ranked by Information Gain (47 found)</text>
+  
+  <!-- Example word list with entropy scores -->
+  <g transform="translate(220, 540)">
+    <!-- Header -->
+    <text x="20" y="20" font-size="12" font-weight="bold" fill="#374151">Word</text>
+    <text x="120" y="20" font-size="12" font-weight="bold" fill="#374151">Entropy Score</text>
+    <text x="220" y="20" font-size="12" font-weight="bold" fill="#374151">Expected Info</text>
+    
+    <!-- Divider line -->
+    <line x1="10" y1="25" x2="350" y2="25" stroke="#d1d5db" stroke-width="1"/>
+    
+    <!-- Word 1 - Highest entropy -->
+    <rect x="10" y="35" width="340" height="25" fill="#f0fdf4" stroke="#22c55e" stroke-width="1" rx="3"/>
+    <text x="20" y="52" font-size="14" font-weight="bold" fill="#15803d">AROSE</text>
+    <text x="120" y="52" font-size="12" fill="#374151">4.68 bits</text>
+    <text x="220" y="52" font-size="11" fill="#6b7280">Best next guess - eliminates most possibilities</text>
+    
+    <!-- Word 2 -->
+    <rect x="10" y="65" width="340" height="25" fill="#fefce8" stroke="#eab308" stroke-width="1" rx="3"/>
+    <text x="20" y="82" font-size="14" fill="#374151">AUDIO</text>
+    <text x="120" y="82" font-size="12" fill="#374151">4.42 bits</text>
+    <text x="220" y="82" font-size="11" fill="#6b7280">High vowel coverage for information gain</text>
+    
+    <!-- Word 3 -->
+    <rect x="10" y="95" width="340" height="25" fill="#eff6ff" stroke="#3b82f6" stroke-width="1" rx="3"/>
+    <text x="20" y="112" font-size="14" fill="#374151">LEARN</text>
+    <text x="120" y="112" font-size="12" fill="#374151">3.95 bits</text>
+    <text x="220" y="112" font-size="11" fill="#6b7280">Good consonant-vowel balance</text>
+    
+    <!-- Word 4 -->
+    <rect x="10" y="125" width="340" height="25" fill="#eff6ff" stroke="#3b82f6" stroke-width="1" rx="3"/>
+    <text x="20" y="142" font-size="14" fill="#374151">HOUSE</text>
+    <text x="120" y="142" font-size="12" fill="#374151">2.73 bits</text>
+    <text x="220" y="142" font-size="11" fill="#6b7280">Lower information gain</text>
+    
+    <!-- Scroll indicator -->
+    <text x="20" y="170" font-size="11" fill="#9ca3af">Scroll for more words (43 remaining)</text>
+  </g>
+  
+  <!-- Drag arrows and annotations -->
+  <!-- Arrow from A to yellow box -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" />
+    </marker>
+  </defs>
+  
+  <path d="M 105 175 Q 300 160 450 175" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
+  <text x="275" y="150" text-anchor="middle" font-size="11" fill="#ef4444">Drag to categorize</text>
+  
+  <!-- Key Features List -->
+  <rect x="50" y="740" width="1100" height="50" fill="#f0f9ff" stroke="#0ea5e9" rx="6"/>
+  <text x="70" y="760" font-size="12" font-weight="bold" fill="#0c4a6e">Key Features:</text>
+  <text x="70" y="775" font-size="11" fill="#0c4a6e">Cards stay in source box when dragged (infinite supply) - Real-time word filtering - Color-coded by Wordle conventions (green/yellow/gray) - Drag from any box to any other box</text>
+</svg>
