@@ -1,3 +1,5 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
 reviews:
   # Enable high-level summaries and sequence diagrams
   high_level_summary: true
@@ -27,36 +29,7 @@ reviews:
         Review documentation for clarity, completeness, and accuracy.
         Ensure installation instructions are correct and comprehensive.
 
-  # Enable finishing touches
-  finishing_touches:
-    enabled: true
-    
-  # Chat settings for interactive feedback
-  chat:
-    auto_reply: true
-    
   # Tools configuration
   tools:
-    # Enable advanced analysis tools
     ast-grep:
       essential_rules: true
-    
-# Knowledge base settings for better context
-knowledge_base:
-  # Enable web search for up-to-date information
-  web_search: true
-  
-  # Automatically learn from conversations
-  learnings: true
-  
-  # Scan for coding guidelines
-  code_guidelines:
-    enabled: true
-    patterns:
-      - "**/.cursorrules"
-      - ".github/copilot-instructions.md"
-      - "**/CLAUDE.md"
-      - "**/.cursor/rules/*"
-      - "**/.windsurfrules"
-      - "**/.clinerules/*"
-      - "**/.rules/*"
