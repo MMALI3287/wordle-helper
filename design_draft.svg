@@ -27,6 +27,11 @@
     <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
       <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.25)"/>
     </filter>
+    
+    <!-- Arrow marker for drag indication -->
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="rgba(59,130,246,0.8)"/>
+    </marker>
   </defs>
 
   <!-- Background -->
@@ -247,20 +252,12 @@
     <text x="175" y="155" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="Inter">+ 6 more starting words</text>
   </g>
 
-  <!-- Performance indicators -->
   <text x="1200" y="560" text-anchor="middle" font-size="14" font-weight="bold" fill="rgba(34,197,94,1)" font-family="Inter">⚡ Performance</text>
   <text x="1200" y="580" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Inter">93 possibilities from 15,918 words</text>
-  <text x="1200" y="595" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Inter">Filtered in <16ms</text>
+  <text x="1200" y="595" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Inter">Filtered in &lt;16ms</text>
   <text x="1200" y="610" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Inter">Entropy calculated in 600ms</text>
   <text x="1200" y="625" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Inter">Web Worker processing</text>
 
-  <!-- Drag arrows -->
-  <defs>
-    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
-      <path d="M0,0 L0,6 L9,3 z" fill="rgba(59,130,246,0.8)"/>
-    </marker>
-  </defs>
-  
   <!-- Arrow from Letters to Yellow -->
   <path d="M 350 200 Q 375 180 420 200" stroke="rgba(59,130,246,0.8)" stroke-width="3" fill="none" marker-end="url(#arrow)" stroke-dasharray="8,4"/>
   <text x="385" y="175" text-anchor="middle" font-size="11" fill="rgba(59,130,246,1)" font-family="Inter">Drag to categorize</text>
