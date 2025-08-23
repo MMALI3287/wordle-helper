@@ -1,159 +1,209 @@
-<svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background -->
-  <rect width="1200" height="800" fill="#f8fafc"/>
-  
-  <!-- Title -->
-  <text x="600" y="40" text-anchor="middle" font-size="24" font-weight="bold" fill="#1f2937">Wordle Helper - Drag and Drop Interface</text>
-  
-  <!-- Three Main Boxes Section -->
-  <text x="600" y="80" text-anchor="middle" font-size="16" fill="#6b7280">Three Kanban-Style Boxes</text>
-  
-  <!-- Box 1: All Letters -->
-  <rect x="50" y="100" width="350" height="200" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="8"/>
-  <text x="225" y="120" text-anchor="middle" font-size="14" font-weight="bold" fill="#374151">All Letter Cards (Infinite Source)</text>
-  
-  <!-- Letter cards in first box showing alphabet grid -->
-  <g transform="translate(70, 140)">
-    <!-- Row 1: A-F -->
-    <rect x="0" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
-    <text x="17.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">A</text>
-    
-    <rect x="45" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
-    <text x="62.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">B</text>
-    
-    <rect x="90" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
-    <text x="107.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">C</text>
-    
-    <rect x="135" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
-    <text x="152.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">D</text>
-    
-    <rect x="180" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
-    <text x="197.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">E</text>
-    
-    <rect x="225" y="0" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
-    <text x="242.5" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">F</text>
-    
-    <!-- Row 2: G-L -->
-    <rect x="0" y="45" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
-    <text x="17.5" y="67" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">G</text>
-    
-    <rect x="45" y="45" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
-    <text x="62.5" y="67" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">H</text>
-    
-    <rect x="90" y="45" width="35" height="35" fill="#e5e7eb" stroke="#9ca3af" rx="4"/>
-    <text x="107.5" y="67" text-anchor="middle" font-size="16" font-weight="bold" fill="#1f2937">I</text>
-    
-    <text x="155" y="67" text-anchor="middle" font-size="12" fill="#6b7280">...etc (all 26 letters)</text>
-  </g>
-  
-  <!-- Box 2: Letters in Word (Yellow) -->
-  <rect x="425" y="100" width="350" height="200" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="8"/>
-  <text x="600" y="120" text-anchor="middle" font-size="14" font-weight="bold" fill="#92400e">Letters in Word (Yellow Letters)</text>
-  <text x="600" y="140" text-anchor="middle" font-size="12" fill="#92400e">Drag letters that appear in word but wrong position</text>
-  
-  <!-- Example yellow letters -->
-  <rect x="450" y="160" width="35" height="35" fill="#fbbf24" stroke="#f59e0b" rx="4"/>
-  <text x="467.5" y="182" text-anchor="middle" font-size="16" font-weight="bold" fill="#92400e">R</text>
-  
-  <rect x="495" y="160" width="35" height="35" fill="#fbbf24" stroke="#f59e0b" rx="4"/>
-  <text x="512.5" y="182" text-anchor="middle" font-size="16" font-weight="bold" fill="#92400e">S</text>
-  
-  <!-- Box 3: Letters Not in Word (Gray) -->
-  <rect x="800" y="100" width="350" height="200" fill="#f3f4f6" stroke="#6b7280" stroke-width="2" rx="8"/>
-  <text x="975" y="120" text-anchor="middle" font-size="14" font-weight="bold" fill="#374151">Letters Not in Word (Gray Letters)</text>
-  <text x="975" y="140" text-anchor="middle" font-size="12" fill="#374151">Drag letters that do not appear in word</text>
-  
-  <!-- Example gray letters -->
-  <rect x="825" y="160" width="35" height="35" fill="#9ca3af" stroke="#6b7280" rx="4"/>
-  <text x="842.5" y="182" text-anchor="middle" font-size="16" font-weight="bold" fill="#374151">T</text>
-  
-  <rect x="870" y="160" width="35" height="35" fill="#9ca3af" stroke="#6b7280" rx="4"/>
-  <text x="887.5" y="182" text-anchor="middle" font-size="16" font-weight="bold" fill="#374151">N</text>
-  
-  <!-- Position Slots Section -->
-  <text x="600" y="350" text-anchor="middle" font-size="16" fill="#6b7280">Known Positions (Green Letters)</text>
-  
-  <!-- 5 position slots -->
-  <g transform="translate(450, 370)">
-    <!-- Position 1 -->
-    <rect x="0" y="0" width="50" height="50" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="6"/>
-    <text x="25" y="30" text-anchor="middle" font-size="12" fill="#6b7280">1</text>
-    
-    <!-- Position 2 -->
-    <rect x="60" y="0" width="50" height="50" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="6"/>
-    <text x="85" y="30" text-anchor="middle" font-size="12" fill="#6b7280">2</text>
-    
-    <!-- Position 3 with letter -->
-    <rect x="120" y="0" width="50" height="50" fill="#bbf7d0" stroke="#16a34a" stroke-width="2" rx="6"/>
-    <text x="145" y="35" text-anchor="middle" font-size="20" font-weight="bold" fill="#15803d">O</text>
-    
-    <!-- Position 4 -->
-    <rect x="180" y="0" width="50" height="50" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="6"/>
-    <text x="205" y="30" text-anchor="middle" font-size="12" fill="#6b7280">4</text>
-    
-    <!-- Position 5 -->
-    <rect x="240" y="0" width="50" height="50" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="6"/>
-    <text x="265" y="30" text-anchor="middle" font-size="12" fill="#6b7280">5</text>
-  </g>
-  
-  <!-- Word Suggestions Section -->
-  <text x="600" y="480" text-anchor="middle" font-size="16" fill="#6b7280">Word Suggestions (Entropy-Ranked)</text>
-  
-  <!-- Suggestions container -->
-  <rect x="200" y="500" width="800" height="220" fill="#ffffff" stroke="#d1d5db" stroke-width="2" rx="8"/>
-  <text x="600" y="525" text-anchor="middle" font-size="14" font-weight="bold" fill="#1f2937">Matching Words - Ranked by Information Gain (47 found)</text>
-  
-  <!-- Example word list with entropy scores -->
-  <g transform="translate(220, 540)">
-    <!-- Header -->
-    <text x="20" y="20" font-size="12" font-weight="bold" fill="#374151">Word</text>
-    <text x="120" y="20" font-size="12" font-weight="bold" fill="#374151">Entropy Score</text>
-    <text x="220" y="20" font-size="12" font-weight="bold" fill="#374151">Expected Info</text>
-    
-    <!-- Divider line -->
-    <line x1="10" y1="25" x2="350" y2="25" stroke="#d1d5db" stroke-width="1"/>
-    
-    <!-- Word 1 - Highest entropy -->
-    <rect x="10" y="35" width="340" height="25" fill="#f0fdf4" stroke="#22c55e" stroke-width="1" rx="3"/>
-    <text x="20" y="52" font-size="14" font-weight="bold" fill="#15803d">AROSE</text>
-    <text x="120" y="52" font-size="12" fill="#374151">4.68 bits</text>
-    <text x="220" y="52" font-size="11" fill="#6b7280">Best next guess - eliminates most possibilities</text>
-    
-    <!-- Word 2 -->
-    <rect x="10" y="65" width="340" height="25" fill="#fefce8" stroke="#eab308" stroke-width="1" rx="3"/>
-    <text x="20" y="82" font-size="14" fill="#374151">AUDIO</text>
-    <text x="120" y="82" font-size="12" fill="#374151">4.42 bits</text>
-    <text x="220" y="82" font-size="11" fill="#6b7280">High vowel coverage for information gain</text>
-    
-    <!-- Word 3 -->
-    <rect x="10" y="95" width="340" height="25" fill="#eff6ff" stroke="#3b82f6" stroke-width="1" rx="3"/>
-    <text x="20" y="112" font-size="14" fill="#374151">LEARN</text>
-    <text x="120" y="112" font-size="12" fill="#374151">3.95 bits</text>
-    <text x="220" y="112" font-size="11" fill="#6b7280">Good consonant-vowel balance</text>
-    
-    <!-- Word 4 -->
-    <rect x="10" y="125" width="340" height="25" fill="#eff6ff" stroke="#3b82f6" stroke-width="1" rx="3"/>
-    <text x="20" y="142" font-size="14" fill="#374151">HOUSE</text>
-    <text x="120" y="142" font-size="12" fill="#374151">2.73 bits</text>
-    <text x="220" y="142" font-size="11" fill="#6b7280">Lower information gain</text>
-    
-    <!-- Scroll indicator -->
-    <text x="20" y="170" font-size="11" fill="#9ca3af">Scroll for more words (43 remaining)</text>
-  </g>
-  
-  <!-- Drag arrows and annotations -->
-  <!-- Arrow from A to yellow box -->
+<svg viewBox="0 0 1100 540"
+  xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
-      <polygon points="0 0, 10 3.5, 0 7" fill="#ef4444" />
-    </marker>
+    <!-- Main purple gradient background -->
+    <radialGradient id="mainBg" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" style="stop-color:#7c3aed"/>
+      <stop offset="50%" style="stop-color:#581c87"/>
+      <stop offset="100%" style="stop-color:#1e1b4b"/>
+    </radialGradient>
   </defs>
-  
-  <path d="M 105 175 Q 300 160 450 175" stroke="#ef4444" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5"/>
-  <text x="275" y="150" text-anchor="middle" font-size="11" fill="#ef4444">Drag to categorize</text>
-  
-  <!-- Key Features List -->
-  <rect x="50" y="740" width="1100" height="50" fill="#f0f9ff" stroke="#0ea5e9" rx="6"/>
-  <text x="70" y="760" font-size="12" font-weight="bold" fill="#0c4a6e">Key Features:</text>
-  <text x="70" y="775" font-size="11" fill="#0c4a6e">Cards stay in source box when dragged (infinite supply) - Real-time word filtering - Color-coded by Wordle conventions (green/yellow/gray) - Drag from any box to any other box</text>
+
+  <!-- Main background -->
+  <rect width="1100" height="540" fill="url(#mainBg)"/>
+
+  <!-- Header -->
+  <text x="40" y="35" font-size="20" font-weight="600" fill="white" font-family="Inter">🎯 Wordle Helper</text>
+
+  <!-- Word Length selector -->
+  <rect x="940" y="15" width="120" height="30" fill="rgba(168,85,247,0.3)" stroke="rgba(168,85,247,0.5)" rx="15"/>
+  <text x="1000" y="26" font-size="10" fill="rgba(255,255,255,0.7)" font-family="Inter" text-anchor="middle">Word Length</text>
+  <text x="1000" y="38" font-size="12" font-weight="bold" fill="white" font-family="Inter" text-anchor="middle">5 letters ▼</text>
+
+  <!-- Top Row: Letters, Yellow, Grey -->
+
+  <!-- Letters Section (Blue) -->
+  <rect x="40" y="65" width="280" height="120" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)" stroke-width="1" rx="8"/>
+  <rect x="45" y="70" width="270" height="22" fill="rgba(59,130,246,0.6)" rx="4"/>
+  <text x="180" y="84" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">📝 Letters</text>
+
+  <!-- Letter grid -->
+  <g transform="translate(80,100)">
+    <rect x="0" y="0" width="25" height="25" fill="rgba(59,130,246,0.4)" stroke="rgba(59,130,246,0.6)" rx="3"/>
+    <text x="12" y="17" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">A</text>
+    <rect x="30" y="0" width="25" height="25" fill="rgba(59,130,246,0.4)" stroke="rgba(59,130,246,0.6)" rx="3"/>
+    <text x="42" y="17" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">B</text>
+    <rect x="60" y="0" width="25" height="25" fill="rgba(59,130,246,0.4)" stroke="rgba(59,130,246,0.6)" rx="3"/>
+    <text x="72" y="17" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">C</text>
+    <rect x="90" y="0" width="25" height="25" fill="rgba(59,130,246,0.4)" stroke="rgba(59,130,246,0.6)" rx="3"/>
+    <text x="102" y="17" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">D</text>
+    <rect x="120" y="0" width="25" height="25" fill="rgba(59,130,246,0.4)" stroke="rgba(59,130,246,0.6)" rx="3"/>
+    <text x="132" y="17" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">E</text>
+    <rect x="150" y="0" width="25" height="25" fill="rgba(59,130,246,0.4)" stroke="rgba(59,130,246,0.6)" rx="3"/>
+    <text x="162" y="17" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">F</text>
+    <rect x="180" y="0" width="25" height="25" fill="rgba(59,130,246,0.4)" stroke="rgba(59,130,246,0.6)" rx="3"/>
+    <text x="192" y="17" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">G</text>
+
+    <!-- Second row -->
+    <rect x="0" y="30" width="25" height="25" fill="rgba(59,130,246,0.4)" stroke="rgba(59,130,246,0.6)" rx="3"/>
+    <text x="12" y="47" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">H</text>
+    <rect x="30" y="30" width="25" height="25" fill="rgba(59,130,246,0.4)" stroke="rgba(59,130,246,0.6)" rx="3"/>
+    <text x="42" y="47" font-size="10" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">...</text>
+  </g>
+
+  <!-- Yellow Section -->
+  <rect x="340" y="65" width="320" height="120" fill="rgba(251,146,60,0.15)" stroke="rgba(251,146,60,0.3)" stroke-width="1" rx="8"/>
+  <rect x="345" y="70" width="310" height="22" fill="rgba(251,146,60,0.6)" rx="4"/>
+  <text x="500" y="84" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">🟨 Yellow - Wrong Position</text>
+
+  <text x="500" y="108" font-size="9" fill="rgba(255,255,255,0.8)" font-family="Inter" text-anchor="middle">Drop letters to the position slots where they are NOT located</text>
+
+  <!-- Position slots -->
+  <g transform="translate(395,115)">
+    <text x="0" y="12" font-size="8" fill="rgba(255,255,255,0.6)" font-family="Inter">Pos 1</text>
+    <rect x="0" y="15" width="22" height="22" fill="rgba(239,68,68,0.3)" stroke="rgba(239,68,68,0.5)" rx="3"/>
+    <text x="11" y="29" font-size="10" fill="white" text-anchor="middle" font-family="monospace">X</text>
+
+    <text x="30" y="12" font-size="8" fill="rgba(255,255,255,0.6)" font-family="Inter">Pos 2</text>
+    <rect x="30" y="15" width="22" height="22" fill="rgba(239,68,68,0.3)" stroke="rgba(239,68,68,0.5)" rx="3"/>
+    <text x="41" y="29" font-size="10" fill="white" text-anchor="middle" font-family="monospace">X</text>
+
+    <text x="60" y="12" font-size="8" fill="rgba(255,255,255,0.6)" font-family="Inter">Pos 3</text>
+    <rect x="60" y="15" width="22" height="22" fill="rgba(239,68,68,0.3)" stroke="rgba(239,68,68,0.5)" rx="3"/>
+    <text x="71" y="29" font-size="10" fill="white" text-anchor="middle" font-family="monospace">X</text>
+
+    <text x="90" y="12" font-size="8" fill="rgba(255,255,255,0.6)" font-family="Inter">Pos 4</text>
+    <rect x="90" y="15" width="22" height="22" fill="rgba(251,146,60,0.3)" stroke="rgba(251,146,60,0.5)" rx="3"/>
+    <text x="101" y="29" font-size="10" fill="white" text-anchor="middle" font-family="monospace"></text>
+
+    <text x="120" y="12" font-size="8" fill="rgba(255,255,255,0.6)" font-family="Inter">Pos 5</text>
+    <rect x="120" y="15" width="22" height="22" fill="rgba(251,146,60,0.3)" stroke="rgba(251,146,60,0.5)" rx="3"/>
+    <text x="131" y="29" font-size="10" fill="white" text-anchor="middle" font-family="monospace"></text>
+  </g>
+
+  <!-- Grey Section -->
+  <rect x="680" y="65" width="240" height="120" fill="rgba(75,85,99,0.15)" stroke="rgba(75,85,99,0.3)" stroke-width="1" rx="8"/>
+  <rect x="685" y="70" width="230" height="22" fill="rgba(75,85,99,0.6)" rx="4"/>
+  <text x="800" y="84" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">⚫ Grey</text>
+
+  <text x="800" y="108" font-size="9" fill="rgba(255,255,255,0.6)" font-family="Inter" text-anchor="middle">Not in word</text>
+
+  <!-- Grey letters -->
+  <g transform="translate(750,120)">
+    <rect x="0" y="0" width="22" height="22" fill="rgba(75,85,99,0.4)" stroke="rgba(75,85,99,0.6)" rx="3"/>
+    <text x="11" y="14" font-size="10" fill="rgba(255,255,255,0.7)" text-anchor="middle" font-family="monospace">T</text>
+    <rect x="27" y="0" width="22" height="22" fill="rgba(75,85,99,0.4)" stroke="rgba(75,85,99,0.6)" rx="3"/>
+    <text x="38" y="14" font-size="10" fill="rgba(255,255,255,0.7)" text-anchor="middle" font-family="monospace">N</text>
+    <rect x="54" y="0" width="22" height="22" fill="rgba(75,85,99,0.4)" stroke="rgba(75,85,99,0.6)" rx="3"/>
+    <text x="65" y="14" font-size="10" fill="rgba(255,255,255,0.7)" text-anchor="middle" font-family="monospace">S</text>
+  </g>
+
+  <!-- Performance indicator (top right) -->
+  <rect x="940" y="65" width="120" height="45" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.2)" rx="6"/>
+  <text x="950" y="78" font-size="8" font-weight="600" fill="rgba(34,197,94,1)" font-family="Inter">⚡ Performance</text>
+  <text x="950" y="88" font-size="7" fill="rgba(255,255,255,0.8)" font-family="Inter">Filtered in 435ms from 15918 words</text>
+  <text x="950" y="98" font-size="7" fill="rgba(255,255,255,0.6)" font-family="Inter">Entropy calculated in 16.06ms</text>
+
+  <!-- Green Section (Full Width) -->
+  <rect x="40" y="200" width="1020" height="90" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.3)" stroke-width="1" rx="8"/>
+  <rect x="45" y="205" width="1010" height="20" fill="rgba(34,197,94,0.6)" rx="4"/>
+  <text x="550" y="218" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">🟩 Green - Confirmed Positions</text>
+
+  <text x="550" y="242" font-size="9" fill="rgba(255,255,255,0.8)" font-family="Inter" text-anchor="middle">Drop letters here to confirm they are in the correct position. Right-click to move to yellow.</text>
+
+  <!-- Green position slots -->
+  <g transform="translate(450,255)">
+    <text x="12" y="8" font-size="7" fill="rgba(255,255,255,0.6)" text-anchor="middle" font-family="Inter">2</text>
+    <rect x="0" y="10" width="25" height="25" fill="rgba(34,197,94,0.4)" stroke="rgba(34,197,94,0.6)" rx="3"/>
+    <text x="12" y="27" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">R</text>
+
+    <text x="47" y="8" font-size="7" fill="rgba(255,255,255,0.6)" text-anchor="middle" font-family="Inter">3</text>
+    <rect x="35" y="10" width="25" height="25" fill="rgba(34,197,94,0.4)" stroke="rgba(34,197,94,0.6)" rx="3"/>
+    <text x="47" y="27" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">3</text>
+
+    <text x="82" y="8" font-size="7" fill="rgba(255,255,255,0.6)" text-anchor="middle" font-family="Inter">4</text>
+    <rect x="70" y="10" width="25" height="25" fill="rgba(34,197,94,0.4)" stroke="rgba(34,197,94,0.6)" rx="3"/>
+    <text x="82" y="27" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">4</text>
+
+    <text x="117" y="8" font-size="7" fill="rgba(255,255,255,0.6)" text-anchor="middle" font-family="Inter">5</text>
+    <rect x="105" y="10" width="25" height="25" fill="rgba(34,197,94,0.4)" stroke="rgba(34,197,94,0.6)" rx="3"/>
+    <text x="117" y="27" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace">5</text>
+
+    <text x="152" y="8" font-size="7" fill="rgba(255,255,255,0.6)" text-anchor="middle" font-family="Inter">1</text>
+    <rect x="140" y="10" width="25" height="25" fill="rgba(34,197,94,0.4)" stroke="rgba(34,197,94,0.6)" rx="3"/>
+    <text x="152" y="27" font-size="12" font-weight="bold" fill="white" text-anchor="middle" font-family="monospace"></text>
+  </g>
+
+  <!-- Bottom Row: Optimal Next Words and Best Starting Words -->
+
+  <!-- Optimal Next Words Section -->
+  <rect x="40" y="300" width="520" height="150" fill="rgba(168,85,247,0.15)" stroke="rgba(168,85,247,0.3)" stroke-width="1" rx="8"/>
+  <rect x="45" y="305" width="510" height="20" fill="rgba(168,85,247,0.6)" rx="4"/>
+  <text x="300" y="318" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">🧠 Optimal Next Words (Debug: 0 words)</text>
+
+  <text x="300" y="345" font-size="9" fill="rgba(255,255,255,0.8)" font-family="Inter" text-anchor="middle">Words ranked by Information theory - higher bits = better choice</text>
+
+  <text x="300" y="385" font-size="10" fill="rgba(255,255,255,0.6)" font-family="Inter" text-anchor="middle">No words calculated yet. Debug info: wordleLists, fetchedItems</text>
+
+  <!-- Best Starting Words Section -->
+  <rect x="580" y="300" width="480" height="150" fill="rgba(236,72,153,0.15)" stroke="rgba(236,72,153,0.3)" stroke-width="1" rx="8"/>
+  <rect x="585" y="305" width="470" height="20" fill="rgba(236,72,153,0.6)" rx="4"/>
+  <text x="820" y="318" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">🎯 Best Starting Words (5 Letters)</text>
+
+  <text x="820" y="345" font-size="9" fill="rgba(255,255,255,0.8)" font-family="Inter" text-anchor="middle">Pre-computed optimal starting words based on letter frequency and Information theory</text>
+
+  <!-- Starting words grid -->
+  <g transform="translate(665,360)">
+    <!-- Top row -->
+    <rect x="0" y="0" width="50" height="30" fill="rgba(59,130,246,0.3)" stroke="rgba(59,130,246,0.5)" rx="4"/>
+    <text x="25" y="16" font-size="9" font-weight="bold" fill="rgba(59,130,246,1)" text-anchor="middle" font-family="monospace">CRANE</text>
+    <text x="25" y="25" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">5.91 bits</text>
+
+    <rect x="60" y="0" width="50" height="30" fill="rgba(99,102,241,0.3)" stroke="rgba(99,102,241,0.5)" rx="4"/>
+    <text x="85" y="16" font-size="9" font-weight="bold" fill="rgba(99,102,241,1)" text-anchor="middle" font-family="monospace">SLATE</text>
+    <text x="85" y="25" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">5.82 bits</text>
+
+    <rect x="120" y="0" width="50" height="30" fill="rgba(168,85,247,0.3)" stroke="rgba(168,85,247,0.5)" rx="4"/>
+    <text x="145" y="16" font-size="9" font-weight="bold" fill="rgba(168,85,247,1)" text-anchor="middle" font-family="monospace">SOARE</text>
+    <text x="145" y="25" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">5.89 bits</text>
+
+    <rect x="180" y="0" width="50" height="30" fill="rgba(245,158,11,0.3)" stroke="rgba(245,158,11,0.5)" rx="4"/>
+    <text x="205" y="16" font-size="9" font-weight="bold" fill="rgba(245,158,11,1)" text-anchor="middle" font-family="monospace">ADIEU</text>
+    <text x="205" y="25" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">5.12 bits</text>
+
+    <rect x="240" y="0" width="50" height="30" fill="rgba(236,72,153,0.3)" stroke="rgba(236,72,153,0.5)" rx="4"/>
+    <text x="265" y="16" font-size="9" font-weight="bold" fill="rgba(236,72,153,1)" text-anchor="middle" font-family="monospace">STARE</text>
+    <text x="265" y="25" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">5.71 bits</text>
+
+    <!-- Bottom row -->
+    <rect x="0" y="40" width="50" height="30" fill="rgba(34,197,94,0.3)" stroke="rgba(34,197,94,0.5)" rx="4"/>
+    <text x="25" y="56" font-size="9" font-weight="bold" fill="rgba(34,197,94,1)" text-anchor="middle" font-family="monospace">SALET</text>
+    <text x="25" y="65" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">5.84 bits</text>
+
+    <rect x="60" y="40" width="50" height="30" fill="rgba(14,165,233,0.3)" stroke="rgba(14,165,233,0.5)" rx="4"/>
+    <text x="85" y="56" font-size="9" font-weight="bold" fill="rgba(14,165,233,1)" text-anchor="middle" font-family="monospace">RAISE</text>
+    <text x="85" y="65" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">5.88 bits</text>
+
+    <rect x="120" y="40" width="50" height="30" fill="rgba(239,68,68,0.3)" stroke="rgba(239,68,68,0.5)" rx="4"/>
+    <text x="145" y="56" font-size="9" font-weight="bold" fill="rgba(239,68,68,1)" text-anchor="middle" font-family="monospace">AROSE</text>
+    <text x="145" y="65" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">5.02 bits</text>
+
+    <rect x="180" y="40" width="50" height="30" fill="rgba(245,101,101,0.3)" stroke="rgba(245,101,101,0.5)" rx="4"/>
+    <text x="205" y="56" font-size="9" font-weight="bold" fill="rgba(245,101,101,1)" text-anchor="middle" font-family="monospace">AUDIO</text>
+    <text x="205" y="65" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">4.52 bits</text>
+
+    <rect x="240" y="40" width="50" height="30" fill="rgba(139,69,19,0.3)" stroke="rgba(139,69,19,0.5)" rx="4"/>
+    <text x="265" y="56" font-size="9" font-weight="bold" fill="rgba(139,69,19,1)" text-anchor="middle" font-family="monospace">IRATE</text>
+    <text x="265" y="65" font-size="7" fill="rgba(255,255,255,0.8)" text-anchor="middle" font-family="Inter">4.97 bits</text>
+  </g>
+
+  <!-- Bottom status -->
+  <rect x="40" y="470" width="1020" height="25" fill="rgba(75,85,99,0.1)" stroke="rgba(75,85,99,0.2)" rx="6"/>
+  <rect x="490" y="475" width="120" height="15" fill="rgba(34,197,94,0.3)" rx="3"/>
+  <text x="550" y="485" font-size="8" font-weight="600" fill="rgba(34,197,94,1)" text-anchor="middle" font-family="Inter">15918 Possibilities</text>
+
+  <!-- Key Features footer -->
+  <rect x="40" y="505" width="1020" height="20" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.2)" rx="4"/>
+  <text x="550" y="512" font-size="8" font-weight="600" fill="rgba(59,130,246,1)" font-family="Inter" text-anchor="middle">Key Features:</text>
+  <text x="550" y="522" font-size="7" fill="rgba(255,255,255,0.8)" font-family="Inter" text-anchor="middle">Real-time entropy calculations • Smart constraint tracking • 3-12 letter support • Web Worker processing • Information theory engine • Research-backed starting words</text>
 </svg>

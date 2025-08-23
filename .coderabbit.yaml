@@ -4,7 +4,7 @@ reviews:
   # Enable high-level summaries and sequence diagrams
   high_level_summary: true
   sequence_diagrams: true
-  
+
   # Path-based instructions for better review quality
   path_instructions:
     - path: "src/**/*.ts"
@@ -12,18 +12,18 @@ reviews:
         Focus on TypeScript best practices, type safety, and performance optimizations.
         Pay special attention to entropy calculations and worker implementations.
         Review error handling and async patterns.
-    
+
     - path: "src/entropy*.ts"
       instructions: |
         Review information theory implementations, mathematical accuracy,
         and performance optimization techniques. Ensure algorithms are correct
         and efficiently implemented.
-    
+
     - path: "*.config.{ts,js}"
       instructions: |
         Review build configuration for optimization opportunities,
         security considerations, and best practices for modern tooling.
-    
+
     - path: "*.md"
       instructions: |
         Review documentation for clarity, completeness, and accuracy.
