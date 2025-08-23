@@ -61,7 +61,7 @@ npm install
 npm run dev
 ```
 
-The app will be available at `http://localhost:3001` (or next available port).
+Open the URL printed by the dev server in your terminal (for example, `http://localhost:3000` or `http://localhost:3001`).
 
 ### Production Build
 
@@ -193,7 +193,8 @@ Based on real testing with 29,874 six-letter words:
 
 ### Starting Word Recommendations
 
-- **5-letter**: CRANE (5.89 bits, MIT analysis), SLATE (5.82 bits, NYT Wordlebot)
+- **5-letter**: SOARE (5.89 bits), SLATE (~5.84 bits), TRACE (~5.81 bits)
+- Notes: values are approximate and depend on the exact word list used by the app.
 - **Research Sources**: 3Blue1Brown, Tyler Glaiel analysis, MIT researchers
 - **Methodology**: Information theory + letter frequency analysis
 
