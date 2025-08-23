@@ -9,7 +9,7 @@
 ### 🧠 **Intelligent Word Analysis**
 
 - **Information Theory Engine**: Real-time entropy calculations to find optimal word choices using Web Workers
-- **Pre-computed Starting Words**: Research-backed optimal first guesses (CRANE, SLATE, SOARE for 5-letter words)
+- **Pre-computed Starting Words**: Research-backed optimal first guesses (SOARE, SLATE, TRACE for 5‑letter words)
 - **Smart Constraint Logic**: Advanced filtering system that understands green, yellow, and gray letter constraints
 - **Multi-length Support**: Full support for 3-12 letter words with 29,000+ word database
 
