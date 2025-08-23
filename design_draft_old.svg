@@ -1,0 +1,269 @@
+<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradients for modern look -->
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="50%" style="stop-color:#581c87"/>
+      <stop offset="100%" style="stop-color:#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.1)"/>
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0.05)"/>
+    </linearGradient>
+    <linearGradient id="greenGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#bbf7d0"/>
+      <stop offset="100%" style="stop-color:#86efac"/>
+    </linearGradient>
+    <linearGradient id="yellowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fef3c7"/>
+      <stop offset="100%" style="stop-color:#fde047"/>
+    </linearGradient>
+    <linearGradient id="grayGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f3f4f6"/>
+      <stop offset="100%" style="stop-color:#9ca3af"/>
+    </linearGradient>
+    
+    <!-- Drop shadow filter -->
+    <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="rgba(0,0,0,0.25)"/>
+    </filter>
+    
+    <!-- Arrow marker for drag indication -->
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="rgba(59,130,246,0.8)"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1400" height="900" fill="url(#bgGradient)"/>
+  
+  <!-- Cosmic effects -->
+  <circle cx="100" cy="100" r="2" fill="rgba(255,255,255,0.6)" opacity="0.8"/>
+  <circle cx="300" cy="150" r="1.5" fill="rgba(255,255,255,0.4)" opacity="0.6"/>
+  <circle cx="1200" cy="200" r="2.5" fill="rgba(255,255,255,0.7)" opacity="0.9"/>
+  <circle cx="1100" cy="800" r="1" fill="rgba(255,255,255,0.3)" opacity="0.5"/>
+  
+  <text x="700" y="60" text-anchor="middle" font-size="36" font-weight="bold" fill="white" font-family="Inter">
+    🎯 Wordle Helper - AI-Powered Word Analysis
+  </text>
+  <text x="700" y="90" text-anchor="middle" font-size="16" fill="rgba(255,255,255,0.8)" font-family="Inter">
+    Drag and Drop Interface with Information Theory Engine
+  </text>
+
+  <!-- Word Length Selector (Top Right) -->
+  <rect x="1150" y="110" width="200" height="80" fill="url(#cardGradient)" stroke="rgba(99,102,241,0.3)" stroke-width="2" rx="12" filter="url(#dropShadow)"/>
+  <text x="1250" y="135" text-anchor="middle" font-size="14" font-weight="bold" fill="rgba(99,102,241,1)" font-family="Inter">📏 Word Length</text>
+  <rect x="1170" y="145" width="160" height="30" fill="rgba(255,255,255,0.1)" stroke="rgba(99,102,241,0.5)" stroke-width="1" rx="6"/>
+  <text x="1250" y="165" text-anchor="middle" font-size="14" fill="white" font-family="Inter">5 letters ▼</text>
+
+  <!-- Three main sections layout -->
+  
+  <!-- Left: Letters Alphabet -->
+  <rect x="50" y="130" width="320" height="240" fill="url(#cardGradient)" stroke="rgba(59,130,246,0.3)" stroke-width="2" rx="16" filter="url(#dropShadow)"/>
+  <text x="210" y="160" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(59,130,246,1)" font-family="Inter">🔤 Letters</text>
+  
+  <!-- Alphabet grid -->
+  <g transform="translate(70, 180)">
+    <!-- Row 1 -->
+    <rect x="0" y="0" width="32" height="32" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" rx="8"/>
+    <text x="16" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(147,197,253,1)">A</text>
+    
+    <rect x="40" y="0" width="32" height="32" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" rx="8"/>
+    <text x="56" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(147,197,253,1)">B</text>
+    
+    <rect x="80" y="0" width="32" height="32" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" rx="8"/>
+    <text x="96" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(147,197,253,1)">C</text>
+    
+    <rect x="120" y="0" width="32" height="32" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" rx="8"/>
+    <text x="136" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(147,197,253,1)">D</text>
+    
+    <rect x="160" y="0" width="32" height="32" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" rx="8"/>
+    <text x="176" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(147,197,253,1)">E</text>
+    
+    <rect x="200" y="0" width="32" height="32" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" rx="8"/>
+    <text x="216" y="22" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(147,197,253,1)">F</text>
+    
+    <!-- Row 2 -->
+    <rect x="0" y="40" width="32" height="32" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" rx="8"/>
+    <text x="16" y="62" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(147,197,253,1)">G</text>
+    
+    <rect x="40" y="40" width="32" height="32" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" rx="8"/>
+    <text x="56" y="62" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(147,197,253,1)">H</text>
+    
+    <text x="140" y="62" text-anchor="middle" font-size="12" fill="rgba(147,197,253,0.7)" font-family="Inter">...all 26 letters</text>
+    
+    <!-- Row 3 indicators -->
+    <rect x="0" y="80" width="280" height="1" fill="rgba(59,130,246,0.3)"/>
+    <text x="140" y="100" text-anchor="middle" font-size="11" fill="rgba(147,197,253,0.8)" font-family="Inter">Infinite supply - drag to categorize</text>
+  </g>
+
+  <!-- Center: Yellow Letters -->
+  <rect x="400" y="130" width="320" height="240" fill="url(#cardGradient)" stroke="rgba(245,158,11,0.3)" stroke-width="2" rx="16" filter="url(#dropShadow)"/>
+  <text x="560" y="160" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(245,158,11,1)" font-family="Inter">🟨 Yellow - Wrong Position</text>
+  
+  <!-- Position slots for wrong positions -->
+  <text x="560" y="185" text-anchor="middle" font-size="12" fill="rgba(245,158,11,0.8)" font-family="Inter">Drop letters where they are NOT located</text>
+  
+  <g transform="translate(430, 200)">
+    <!-- Position indicators -->
+    <text x="30" y="15" text-anchor="middle" font-size="10" fill="rgba(245,158,11,0.7)">Pos 1</text>
+    <text x="80" y="15" text-anchor="middle" font-size="10" fill="rgba(245,158,11,0.7)">Pos 2</text>
+    <text x="130" y="15" text-anchor="middle" font-size="10" fill="rgba(245,158,11,0.7)">Pos 3</text>
+    <text x="180" y="15" text-anchor="middle" font-size="10" fill="rgba(245,158,11,0.7)">Pos 4</text>
+    <text x="230" y="15" text-anchor="middle" font-size="10" fill="rgba(245,158,11,0.7)">Pos 5</text>
+    
+    <!-- Drop zones -->
+    <rect x="10" y="20" width="40" height="40" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+    <text x="30" y="45" text-anchor="middle" font-size="16" fill="rgba(245,158,11,0.5)">❌</text>
+    
+    <rect x="60" y="20" width="40" height="40" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+    <text x="80" y="45" text-anchor="middle" font-size="16" fill="rgba(245,158,11,0.5)">❌</text>
+    
+    <rect x="110" y="20" width="40" height="40" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+    <text x="130" y="45" text-anchor="middle" font-size="16" fill="rgba(245,158,11,0.5)">❌</text>
+    
+    <rect x="160" y="20" width="40" height="40" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+    <text x="180" y="45" text-anchor="middle" font-size="16" fill="rgba(245,158,11,0.5)">❌</text>
+    
+    <rect x="210" y="20" width="40" height="40" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.4)" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+    <text x="230" y="45" text-anchor="middle" font-size="16" fill="rgba(245,158,11,0.5)">❌</text>
+    
+    <!-- Example yellow letter -->
+    <rect x="10" y="80" width="40" height="40" fill="url(#yellowGradient)" stroke="rgba(245,158,11,1)" stroke-width="2" rx="8"/>
+    <text x="30" y="105" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(146,64,14,1)">A</text>
+    <text x="30" y="130" text-anchor="middle" font-size="8" fill="rgba(146,64,14,1)">≠2</text>
+  </g>
+
+  <!-- Right: Gray Letters -->
+  <rect x="750" y="130" width="320" height="240" fill="url(#cardGradient)" stroke="rgba(107,114,128,0.3)" stroke-width="2" rx="16" filter="url(#dropShadow)"/>
+  <text x="910" y="160" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(107,114,128,1)" font-family="Inter">⬛ Gray - Not in Word</text>
+  
+  <!-- Gray drop zone -->
+  <rect x="780" y="180" width="260" height="150" fill="rgba(107,114,128,0.1)" stroke="rgba(107,114,128,0.4)" stroke-width="2" stroke-dasharray="6,6" rx="12"/>
+  <text x="910" y="210" text-anchor="middle" font-size="12" fill="rgba(107,114,128,0.8)" font-family="Inter">Drop letters that don't appear in word</text>
+  
+  <!-- Example gray letters -->
+  <g transform="translate(800, 230)">
+    <rect x="0" y="0" width="40" height="40" fill="url(#grayGradient)" stroke="rgba(107,114,128,1)" stroke-width="2" rx="8"/>
+    <text x="20" y="26" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(55,65,81,1)">T</text>
+    
+    <rect x="50" y="0" width="40" height="40" fill="url(#grayGradient)" stroke="rgba(107,114,128,1)" stroke-width="2" rx="8"/>
+    <text x="70" y="26" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(55,65,81,1)">N</text>
+    
+    <rect x="100" y="0" width="40" height="40" fill="url(#grayGradient)" stroke="rgba(107,114,128,1)" stroke-width="2" rx="8"/>
+    <text x="120" y="26" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(55,65,81,1)">S</text>
+  </g>
+
+  <!-- Bottom: Green Positions -->
+  <rect x="150" y="390" width="800" height="120" fill="url(#cardGradient)" stroke="rgba(34,197,94,0.3)" stroke-width="2" rx="16" filter="url(#dropShadow)"/>
+  <text x="550" y="420" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(34,197,94,1)" font-family="Inter">🟩 Green - Confirmed Positions</text>
+  <text x="550" y="445" text-anchor="middle" font-size="12" fill="rgba(34,197,94,0.8)" font-family="Inter">Drop letters in their correct positions</text>
+  
+  <!-- Position slots -->
+  <g transform="translate(350, 460)">
+    <!-- Position 1 -->
+    <rect x="0" y="0" width="50" height="50" fill="url(#greenGradient)" stroke="rgba(34,197,94,1)" stroke-width="2" rx="8"/>
+    <text x="25" y="32" text-anchor="middle" font-size="20" font-weight="bold" fill="rgba(21,128,61,1)">R</text>
+    
+    <!-- Position 2-5 empty -->
+    <rect x="70" y="0" width="50" height="50" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.4)" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+    <text x="95" y="32" text-anchor="middle" font-size="14" fill="rgba(34,197,94,0.6)">2</text>
+    
+    <rect x="140" y="0" width="50" height="50" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.4)" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+    <text x="165" y="32" text-anchor="middle" font-size="14" fill="rgba(34,197,94,0.6)">3</text>
+    
+    <rect x="210" y="0" width="50" height="50" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.4)" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+    <text x="235" y="32" text-anchor="middle" font-size="14" fill="rgba(34,197,94,0.6)">4</text>
+    
+    <rect x="280" y="0" width="50" height="50" fill="rgba(34,197,94,0.1)" stroke="rgba(34,197,94,0.4)" stroke-width="2" stroke-dasharray="4,4" rx="8"/>
+    <text x="305" y="32" text-anchor="middle" font-size="14" fill="rgba(34,197,94,0.6)">5</text>
+  </g>
+
+  <!-- Results Section -->
+  <rect x="100" y="540" width="500" height="300" fill="url(#cardGradient)" stroke="rgba(139,69,19,0.3)" stroke-width="2" rx="16" filter="url(#dropShadow)"/>
+  <text x="350" y="570" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(168,85,247,1)" font-family="Inter">🧠 Optimal Next Words</text>
+  <text x="350" y="595" text-anchor="middle" font-size="12" fill="rgba(168,85,247,0.8)" font-family="Inter">Ranked by Information Theory (Entropy)</text>
+  
+  <!-- Word suggestions -->
+  <g transform="translate(120, 610)">
+    <!-- Header -->
+    <text x="20" y="20" font-size="12" font-weight="bold" fill="rgba(255,255,255,0.9)" font-family="Inter">Word</text>
+    <text x="120" y="20" font-size="12" font-weight="bold" fill="rgba(255,255,255,0.9)" font-family="Inter">Entropy</text>
+    <text x="220" y="20" font-size="12" font-weight="bold" fill="rgba(255,255,255,0.9)" font-family="Inter">Info Gain</text>
+    
+    <!-- Divider -->
+    <line x1="10" y1="25" x2="450" y2="25" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+    
+    <!-- Top suggestions -->
+    <rect x="10" y="35" width="440" height="25" fill="rgba(34,197,94,0.2)" stroke="rgba(34,197,94,0.5)" stroke-width="1" rx="4"/>
+    <text x="20" y="52" font-size="14" font-weight="bold" fill="rgba(34,197,94,1)" font-family="monospace">METAS</text>
+    <text x="120" y="52" font-size="12" fill="rgba(255,255,255,0.9)" font-family="Inter">4.38 bits</text>
+    <text x="220" y="52" font-size="11" fill="rgba(255,255,255,0.7)" font-family="Inter">Best choice - maximum information</text>
+    
+    <rect x="10" y="65" width="440" height="25" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.5)" stroke-width="1" rx="4"/>
+    <text x="20" y="82" font-size="14" font-weight="bold" fill="rgba(245,158,11,1)" font-family="monospace">SENAM</text>
+    <text x="120" y="82" font-size="12" fill="rgba(255,255,255,0.9)" font-family="Inter">4.31 bits</text>
+    <text x="220" y="82" font-size="11" fill="rgba(255,255,255,0.7)" font-family="Inter">High information value</text>
+    
+    <rect x="10" y="95" width="440" height="25" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" stroke-width="1" rx="4"/>
+    <text x="20" y="112" font-size="14" font-weight="bold" fill="rgba(59,130,246,1)" font-family="monospace">MELTS</text>
+    <text x="120" y="112" font-size="12" fill="rgba(255,255,255,0.9)" font-family="Inter">4.23 bits</text>
+    <text x="220" y="112" font-size="11" fill="rgba(255,255,255,0.7)" font-family="Inter">Good consonant coverage</text>
+    
+    <text x="20" y="140" font-size="11" fill="rgba(255,255,255,0.6)" font-family="Inter">+ 17 more optimal suggestions</text>
+  </g>
+
+  <!-- Starting Words Section -->
+  <rect x="650" y="540" width="500" height="300" fill="url(#cardGradient)" stroke="rgba(236,72,153,0.3)" stroke-width="2" rx="16" filter="url(#dropShadow)"/>
+  <text x="900" y="570" text-anchor="middle" font-size="18" font-weight="bold" fill="rgba(236,72,153,1)" font-family="Inter">🎯 Best Starting Words</text>
+  <text x="900" y="595" text-anchor="middle" font-size="12" fill="rgba(236,72,153,0.8)" font-family="Inter">Research-backed optimal first guesses</text>
+  
+  <!-- Starting word grid -->
+  <g transform="translate(680, 610)">
+    <!-- CRANE -->
+    <rect x="0" y="0" width="110" height="60" fill="rgba(34,197,94,0.2)" stroke="rgba(34,197,94,0.5)" stroke-width="1" rx="8"/>
+    <text x="55" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(34,197,94,1)" font-family="monospace">CRANE</text>
+    <text x="55" y="40" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.9)" font-family="Inter">5.89 bits</text>
+    <text x="55" y="52" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.7)" font-family="Inter">MIT Analysis</text>
+    
+    <!-- SLATE -->
+    <rect x="120" y="0" width="110" height="60" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" stroke-width="1" rx="8"/>
+    <text x="175" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(59,130,246,1)" font-family="monospace">SLATE</text>
+    <text x="175" y="40" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.9)" font-family="Inter">5.82 bits</text>
+    <text x="175" y="52" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.7)" font-family="Inter">NYT Wordlebot</text>
+    
+    <!-- SOARE -->
+    <rect x="240" y="0" width="110" height="60" fill="rgba(168,85,247,0.2)" stroke="rgba(168,85,247,0.5)" stroke-width="1" rx="8"/>
+    <text x="295" y="25" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(168,85,247,1)" font-family="monospace">SOARE</text>
+    <text x="295" y="40" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.9)" font-family="Inter">5.89 bits</text>
+    <text x="295" y="52" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.7)" font-family="Inter">3Blue1Brown</text>
+    
+    <!-- More words in second row -->
+    <rect x="0" y="70" width="110" height="60" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.5)" stroke-width="1" rx="8"/>
+    <text x="55" y="95" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(245,158,11,1)" font-family="monospace">ADIEU</text>
+    <text x="55" y="110" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.9)" font-family="Inter">5.12 bits</text>
+    <text x="55" y="122" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.7)" font-family="Inter">4 vowels</text>
+    
+    <rect x="120" y="70" width="110" height="60" fill="rgba(236,72,153,0.2)" stroke="rgba(236,72,153,0.5)" stroke-width="1" rx="8"/>
+    <text x="175" y="95" text-anchor="middle" font-size="16" font-weight="bold" fill="rgba(236,72,153,1)" font-family="monospace">STARE</text>
+    <text x="175" y="110" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.9)" font-family="Inter">5.71 bits</text>
+    <text x="175" y="122" text-anchor="middle" font-size="9" fill="rgba(255,255,255,0.7)" font-family="Inter">Player favorite</text>
+    
+    <text x="175" y="155" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.6)" font-family="Inter">+ 6 more starting words</text>
+  </g>
+
+  <text x="1200" y="560" text-anchor="middle" font-size="14" font-weight="bold" fill="rgba(34,197,94,1)" font-family="Inter">⚡ Performance</text>
+  <text x="1200" y="580" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Inter">93 possibilities from 15,918 words</text>
+  <text x="1200" y="595" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Inter">Filtered in &lt;16ms</text>
+  <text x="1200" y="610" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Inter">Entropy calculated in 600ms</text>
+  <text x="1200" y="625" text-anchor="middle" font-size="11" fill="rgba(255,255,255,0.8)" font-family="Inter">Web Worker processing</text>
+
+  <!-- Arrow from Letters to Yellow -->
+  <path d="M 350 200 Q 375 180 420 200" stroke="rgba(59,130,246,0.8)" stroke-width="3" fill="none" marker-end="url(#arrow)" stroke-dasharray="8,4"/>
+  <text x="385" y="175" text-anchor="middle" font-size="11" fill="rgba(59,130,246,1)" font-family="Inter">Drag to categorize</text>
+
+  <!-- Features callout -->
+  <rect x="50" y="860" width="1300" height="30" fill="rgba(255,255,255,0.1)" stroke="rgba(59,130,246,0.3)" rx="8"/>
+  <text x="70" y="880" font-size="12" font-weight="bold" fill="rgba(59,130,246,1)" font-family="Inter">Key Features:</text>
+  <text x="180" y="880" font-size="11" fill="rgba(255,255,255,0.9)" font-family="Inter">Real-time entropy calculations • Smart constraint tracking • 3-12 letter support • Web Worker processing • Information theory engine • Research-backed starting words</text>
+</svg>
