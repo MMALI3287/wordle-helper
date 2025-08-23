@@ -139,7 +139,7 @@ npm run preview
 
 ### Algorithm Details
 
-- **Information Theory**: Uses entropy calculations H = -Σ(p_i * log2(p_i))
+- **Information Theory**: Uses entropy calculations H = -Σ(p_i \* log2(p_i))
 - **Pattern Matching**: Efficient constraint checking with early termination
 - **Word Filtering**: Optimized algorithms for real-time results
 - **Constraint Logic**: Advanced yellow letter position exclusion tracking
