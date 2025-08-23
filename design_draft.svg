@@ -23,8 +23,8 @@
   
   <!-- Letters Section (Blue) -->
   <rect x="40" y="65" width="280" height="120" fill="rgba(59,130,246,0.15)" stroke="rgba(59,130,246,0.3)" stroke-width="1" rx="8"/>
-  <rect x="50" y="75" width="60" height="22" fill="rgba(59,130,246,0.6)" rx="4"/>
-  <text x="80" y="89" font-size="11" font-weight="600" fill="white" font-family="Inter">📝 Letters</text>
+  <rect x="45" y="70" width="270" height="22" fill="rgba(59,130,246,0.6)" rx="4"/>
+  <text x="180" y="84" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">📝 Letters</text>
   
   <!-- Letter grid -->
   <g transform="translate(60,100)">
@@ -52,8 +52,8 @@
   
   <!-- Yellow Section -->
   <rect x="340" y="65" width="320" height="120" fill="rgba(251,146,60,0.15)" stroke="rgba(251,146,60,0.3)" stroke-width="1" rx="8"/>
-  <rect x="350" y="75" width="140" height="22" fill="rgba(251,146,60,0.6)" rx="4"/>
-  <text x="420" y="89" font-size="11" font-weight="600" fill="white" font-family="Inter">🟨 Yellow - Wrong Position</text>
+  <rect x="345" y="70" width="310" height="22" fill="rgba(251,146,60,0.6)" rx="4"/>
+  <text x="500" y="84" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">🟨 Yellow - Wrong Position</text>
   
   <text x="360" y="108" font-size="9" fill="rgba(255,255,255,0.8)" font-family="Inter">Drop letters to the position slots where they are NOT located</text>
   
@@ -74,8 +74,8 @@
   
   <!-- Grey Section -->
   <rect x="680" y="65" width="240" height="120" fill="rgba(75,85,99,0.15)" stroke="rgba(75,85,99,0.3)" stroke-width="1" rx="8"/>
-  <rect x="690" y="75" width="60" height="22" fill="rgba(75,85,99,0.6)" rx="4"/>
-  <text x="720" y="89" font-size="11" font-weight="600" fill="white" font-family="Inter">⚫ Grey</text>
+  <rect x="685" y="70" width="230" height="22" fill="rgba(75,85,99,0.6)" rx="4"/>
+  <text x="800" y="84" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">⚫ Grey</text>
   
   <text x="700" y="108" font-size="9" fill="rgba(255,255,255,0.6)" font-family="Inter">Not in word</text>
   
@@ -97,8 +97,8 @@
   
   <!-- Green Section (Full Width) -->
   <rect x="40" y="200" width="1020" height="60" fill="rgba(34,197,94,0.15)" stroke="rgba(34,197,94,0.3)" stroke-width="1" rx="8"/>
-  <rect x="50" y="210" width="140" height="20" fill="rgba(34,197,94,0.6)" rx="4"/>
-  <text x="120" y="223" font-size="11" font-weight="600" fill="white" font-family="Inter">🟩 Green - Confirmed Positions</text>
+  <rect x="45" y="205" width="1010" height="20" fill="rgba(34,197,94,0.6)" rx="4"/>
+  <text x="550" y="218" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">🟩 Green - Confirmed Positions</text>
   
   <text x="60" y="242" font-size="9" fill="rgba(255,255,255,0.8)" font-family="Inter">Drop letters here to confirm they are in the correct position. Right-click to move to yellow.</text>
   
@@ -122,8 +122,8 @@
   
   <!-- Optimal Next Words Section -->
   <rect x="40" y="280" width="520" height="150" fill="rgba(168,85,247,0.15)" stroke="rgba(168,85,247,0.3)" stroke-width="1" rx="8"/>
-  <rect x="50" y="290" width="140" height="20" fill="rgba(168,85,247,0.6)" rx="4"/>
-  <text x="120" y="303" font-size="11" font-weight="600" fill="white" font-family="Inter">🧠 Optimal Next Words (Debug: 0 words)</text>
+  <rect x="45" y="285" width="510" height="20" fill="rgba(168,85,247,0.6)" rx="4"/>
+  <text x="300" y="298" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">🧠 Optimal Next Words (Debug: 0 words)</text>
   
   <text x="60" y="325" font-size="9" fill="rgba(255,255,255,0.8)" font-family="Inter">Words ranked by Information theory - higher bits = better choice</text>
   
@@ -131,8 +131,8 @@
   
   <!-- Best Starting Words Section -->
   <rect x="580" y="280" width="480" height="150" fill="rgba(236,72,153,0.15)" stroke="rgba(236,72,153,0.3)" stroke-width="1" rx="8"/>
-  <rect x="590" y="290" width="130" height="20" fill="rgba(236,72,153,0.6)" rx="4"/>
-  <text x="655" y="303" font-size="11" font-weight="600" fill="white" font-family="Inter">🎯 Best Starting Words (5 Letters)</text>
+  <rect x="585" y="285" width="470" height="20" fill="rgba(236,72,153,0.6)" rx="4"/>
+  <text x="820" y="298" font-size="11" font-weight="600" fill="white" font-family="Inter" text-anchor="middle">🎯 Best Starting Words (5 Letters)</text>
   
   <text x="600" y="325" font-size="9" fill="rgba(255,255,255,0.8)" font-family="Inter">Pre-computed optimal starting words based on letter frequency and Information theory</text>
   
