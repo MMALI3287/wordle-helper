@@ -27,15 +27,15 @@ class OptimizedEntropyCalculator {
     if (!guess || !target || guess.length !== target.length) {
       return '';
     }
-    
+
     const result = new Array(guess.length).fill('B');
     const targetFreq = new Array(26).fill(0);
-    
+
     // Count target letter frequencies using char codes for speed
     for (let i = 0; i < target.length; i++) {
       targetFreq[target.charCodeAt(i) - 65]++;
     }
-    
+
     // First pass: mark green letters and reduce frequency
     for (let i = 0; i < guess.length; i++) {
       if (guess[i] === target[i]) {
@@ -43,7 +43,7 @@ class OptimizedEntropyCalculator {
         targetFreq[guess.charCodeAt(i) - 65]--;
       }
     }
-    
+
     // Second pass: mark yellow letters
     for (let i = 0; i < guess.length; i++) {
       if (result[i] === 'B') {
@@ -54,7 +54,7 @@ class OptimizedEntropyCalculator {
         }
       }
     }
-    
+
     return result.join('');
   }
 
@@ -62,10 +62,10 @@ class OptimizedEntropyCalculator {
   calculateEntropy(guessWord: string, possibleAnswers = this.possibleAnswers): number {
     if (!guessWord || typeof guessWord !== 'string') return 0;
     if (!Array.isArray(possibleAnswers) || possibleAnswers.length <= 1) return 0;
-    
+
     const patternCounts = new Map<string, number>();
     const upperGuess = guessWord.toUpperCase();
-    
+
     // Use for-loop instead of forEach for better performance
     for (let i = 0; i < possibleAnswers.length; i++) {
       const pattern = this.getPattern(upperGuess, possibleAnswers[i]);
@@ -73,28 +73,28 @@ class OptimizedEntropyCalculator {
         patternCounts.set(pattern, (patternCounts.get(pattern) || 0) + 1);
       }
     }
-    
+
     // Calculate Shannon entropy with optimized math
     let entropy = 0;
     const totalAnswers = possibleAnswers.length;
     const log2 = Math.log(2);
-    
+
     // Use forEach instead of for...of for compatibility
     patternCounts.forEach((count) => {
       const probability = count / totalAnswers;
       entropy -= probability * (Math.log(probability) / log2);
     });
-    
+
     return entropy;
   }
 
   // Lightning-fast bulk entropy calculation
   calculateAllEntropies(allWords = this.allWords, possibleAnswers = this.possibleAnswers) {
     if (possibleAnswers.length === 0) return [];
-    
+
     // Pre-allocate results array for better memory performance
     const results = new Array(allWords.length);
-    
+
     // Use traditional for-loop for maximum performance
     for (let i = 0; i < allWords.length; i++) {
       const entropy = this.calculateEntropy(allWords[i], possibleAnswers);
@@ -104,46 +104,46 @@ class OptimizedEntropyCalculator {
         bitsOfInfo: Math.round(entropy * 100) / 100
       };
     }
-    
+
     // Native sort is optimized in modern JS engines
     results.sort((a, b) => b.entropy - a.entropy);
-    
+
     return results;
   }
 
   // High-speed word filtering with early termination
   filterWords(
-    words: string[], 
-    knownPositions: string[], 
-    yellowLetters: Array<{ letter: string; excludedPositions: number[] }>, 
+    words: string[],
+    knownPositions: string[],
+    yellowLetters: Array<{ letter: string; excludedPositions: number[] }>,
     grayLetters: string[]
   ): string[] {
     const filtered: string[] = [];
     const graySet = new Set(grayLetters.map(l => l.toUpperCase()));
-    
+
     // Pre-process yellow letters for faster lookup
     const yellowConstraints = yellowLetters.map(y => ({
       letter: y.letter.toUpperCase(),
       excludedSet: new Set(y.excludedPositions)
     }));
-    
+
     wordLoop: for (let i = 0; i < words.length; i++) {
       const word = words[i].toUpperCase();
-      
+
       // Check gray letters first (fastest elimination)
       for (let j = 0; j < word.length; j++) {
         if (graySet.has(word[j])) {
           continue wordLoop;
         }
       }
-      
+
       // Check known positions (green letters)
       for (let j = 0; j < knownPositions.length; j++) {
         if (knownPositions[j] && word[j] !== knownPositions[j]) {
           continue wordLoop;
         }
       }
-      
+
       // Check yellow letters
       let skipWord = false;
       for (const yellow of yellowConstraints) {
@@ -152,7 +152,7 @@ class OptimizedEntropyCalculator {
           skipWord = true;
           break;
         }
-        
+
         // Letter must not be in excluded positions
         const excludedPositions = Array.from(yellow.excludedSet);
         for (let k = 0; k < excludedPositions.length; k++) {
@@ -161,15 +161,15 @@ class OptimizedEntropyCalculator {
             break;
           }
         }
-        
+
         if (skipWord) break;
       }
-      
+
       if (skipWord) continue;
-      
+
       filtered.push(words[i]); // Keep original case
     }
-    
+
     return filtered;
   }
 
@@ -178,7 +178,7 @@ class OptimizedEntropyCalculator {
     if (!Array.isArray(allWords) || !Array.isArray(possibleAnswers)) {
       throw new Error('Invalid word lists provided');
     }
-    
+
     this.allWords = allWords
       .filter(word => typeof word === 'string' && word.length > 0)
       .map(w => w.toUpperCase());
@@ -192,39 +192,44 @@ class OptimizedEntropyCalculator {
 const calculator = new OptimizedEntropyCalculator();
 
 // Web Worker message handler with proper typing
-self.onmessage = function(e: MessageEvent<WorkerMessage>) {
+self.onmessage = function (e: MessageEvent<WorkerMessage>) {
   const { type, data, requestId } = e.data;
-  
+
   try {
     let result: any;
-    
+
     switch (type) {
+      case 'ready':
+        // Worker is ready, send ready confirmation
+        self.postMessage({ type: 'ready' });
+        return;
+
       case 'setWordLists':
         calculator.setWordLists(data.allWords, data.possibleAnswers);
         result = { success: true };
         break;
-        
+
       case 'calculateEntropy':
         result = calculator.calculateEntropy(data.word, data.possibleAnswers);
         break;
-        
+
       case 'calculateAllEntropies':
         result = calculator.calculateAllEntropies(data.allWords, data.possibleAnswers);
         break;
-        
+
       case 'filterWords':
         result = calculator.filterWords(
-          data.words, 
-          data.knownPositions, 
-          data.yellowLetters, 
+          data.words,
+          data.knownPositions,
+          data.yellowLetters,
           data.grayLetters
         );
         break;
-        
+
       default:
         throw new Error(`Unknown message type: ${type}`);
     }
-    
+
     // Send success response
     const response: WorkerResponse = {
       type: 'success',
@@ -232,10 +237,10 @@ self.onmessage = function(e: MessageEvent<WorkerMessage>) {
       result
     };
     self.postMessage(response);
-    
+
   } catch (error: any) {
     console.error('❌ Worker error:', error);
-    
+
     // Send error response
     const response: WorkerResponse = {
       type: 'error',
@@ -246,4 +251,4 @@ self.onmessage = function(e: MessageEvent<WorkerMessage>) {
   }
 };
 
-export {}; // Make this a module
+export { }; // Make this a module

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { getBestStartingWords } from './bestStartingWords';
@@ -196,6 +196,10 @@ function App() {
   // New state for Web Worker integration
   const [entropyResults, setEntropyResults] = useState<EntropyResult[]>([]);
   const [isCalculatingEntropy, setIsCalculatingEntropy] = useState(false);
+  const [shouldCalculate, setShouldCalculate] = useState(false);
+  
+  // Ref to track current calculation for cancellation
+  const currentCalculationRef = useRef<AbortController | null>(null);
 
 
 
@@ -254,10 +258,10 @@ function App() {
     return result;
   }, [words, knownPositions, yellowLetters, grayLetters]);
 
-  // Calculate entropy-sorted suggestions using Web Worker - ONLY when user has constraints
+  // Calculate entropy-sorted suggestions using Web Worker - ONLY when user manually triggers it
   useEffect(() => {
     const calculateEntropyAsync = async () => {
-      // Only calculate if we have constraints (user has started guessing)
+      // Only calculate if user has explicitly requested it AND we have constraints
       const hasConstraints = knownPositions.some(pos => pos !== '') ||
         yellowLetters.length > 0 ||
         grayLetters.length > 0;
@@ -269,76 +273,120 @@ function App() {
         grayLetters: grayLetters.length
       });
 
-      if (!hasConstraints) {
-        // No constraints = show starting words, no entropy calculation needed
+      if (!hasConstraints || !shouldCalculate) {
+        // No constraints or not requested = clear results, no entropy calculation
         setEntropyResults([]);
         setIsCalculatingEntropy(false);
+        setShouldCalculate(false); // Reset the trigger
         return;
       }
 
       if (words.length === 0) {
         setEntropyResults([]);
         setIsCalculatingEntropy(false);
+        setShouldCalculate(false); // Reset the trigger
         return;
       }
 
       try {
+        // Cancel any existing calculation
+        if (currentCalculationRef.current) {
+          currentCalculationRef.current.abort();
+          // Also cancel the worker calculation
+          entropyWorker.cancelAll();
+        }
+        
+        // Create new abort controller for this calculation
+        const abortController = new AbortController();
+        currentCalculationRef.current = abortController;
+        
         setIsCalculatingEntropy(true);
 
-        // Use filtered words as possible answers and calculate entropy for all words
-        // If no words match current constraints, use a larger subset for better suggestions
-        const possibleAnswers = filteredWords.length > 0 ? filteredWords : words.slice(0, 1000);
+        // Calculate filtered words - these are our possibilities
+        const possibleAnswers = filterWords(words, knownPositions, yellowLetters, grayLetters);
+        
+        console.log(`🧮 Simple calculation: ${possibleAnswers.length} words to analyze`);
         
         // Validate inputs before sending to worker
-        if (!Array.isArray(words) || words.length === 0 || 
-            !Array.isArray(possibleAnswers) || possibleAnswers.length === 0) {
+        if (!Array.isArray(possibleAnswers) || possibleAnswers.length === 0) {
           setEntropyResults([]);
           return;
         }
         
-        // Check if worker is ready
+        // Check if worker is ready and wait if needed
+        try {
+          await entropyWorker.waitForReady();
+        } catch (error) {
+          console.warn('Entropy worker failed to initialize:', error);
+          setEntropyResults([]);
+          return;
+        }
+        
         if (!entropyWorker.isReady()) {
-          console.warn('Entropy worker not ready, skipping calculation');
+          console.warn('Entropy worker not ready after waiting, skipping calculation');
           setEntropyResults([]);
           return;
         }
         
         // Send word lists to worker
-        await entropyWorker.setWordLists(words, possibleAnswers);
+        await entropyWorker.setWordLists(possibleAnswers, possibleAnswers);
         
-        console.log('🧮 About to calculate entropy for', words.length, 'words with', possibleAnswers.length, 'possible answers');
+        console.log('🧮 About to calculate entropy for', possibleAnswers.length, 'possible answers');
         
-        // Calculate entropy for all words with timeout
+        // Calculate entropy for filtered words with timeout and cancellation
         const results = await Promise.race([
-          entropyWorker.calculateAllEntropies(words, possibleAnswers),
+          entropyWorker.calculateAllEntropies(possibleAnswers, possibleAnswers),
           new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Entropy calculation timeout')), 60000)
-          )
+            setTimeout(() => reject(new Error('Entropy calculation timeout')), 30000) // Reduced timeout
+          ),
+          new Promise<never>((_, reject) => {
+            abortController.signal.addEventListener('abort', () => {
+              reject(new Error('Calculation cancelled'));
+            });
+          })
         ]);
+        
+        // Check if calculation was cancelled
+        if (abortController.signal.aborted) {
+          return;
+        }
         
         console.log('✅ Entropy calculation completed with', results?.length || 0, 'results');
         
-        // Validate results
-        if (Array.isArray(results) && results.length > 0) {
+        // Validate results and check cancellation
+        if (!abortController.signal.aborted && Array.isArray(results) && results.length > 0) {
           setEntropyResults(results.slice(0, 20));
-        } else {
+        } else if (!abortController.signal.aborted) {
           setEntropyResults([]);
         }
         
       } catch (error) {
-        console.error('❌ Error in Web Worker entropy calculation:', error);
-        setEntropyResults([]);
+        // Only log errors if not cancelled
+        if (!currentCalculationRef.current?.signal.aborted) {
+          console.error('❌ Error in Web Worker entropy calculation:', error);
+          setEntropyResults([]);
+        }
         // Could implement fallback calculation here if needed
       } finally {
-        setIsCalculatingEntropy(false);
+        // Only reset calculating state if this calculation wasn't cancelled
+        if (!currentCalculationRef.current?.signal.aborted) {
+          setIsCalculatingEntropy(false);
+          setShouldCalculate(false); // Reset manual calculation trigger
+        }
       }
     };
 
     // Debounce calculations to avoid excessive computation
     const timeoutId = setTimeout(calculateEntropyAsync, 300);
     
-    return () => clearTimeout(timeoutId);
-  }, [words, filteredWords, knownPositions, yellowLetters, grayLetters]);
+    return () => {
+      clearTimeout(timeoutId);
+      // Cancel ongoing calculation when dependencies change
+      if (currentCalculationRef.current) {
+        currentCalculationRef.current.abort();
+      }
+    };
+  }, [words, knownPositions, yellowLetters, grayLetters, shouldCalculate]);
 
   // Simple game state
   const isGameWon = filteredWords.length === 1;
@@ -488,23 +536,11 @@ function App() {
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(120,119,198,0.3),transparent_50%)]"></div>
         <div className="fixed inset-0 bg-[radial-gradient(circle_at_75%_75%,rgba(236,72,153,0.2),transparent_50%)]"></div>
 
-        {/* Subtle background processing indicator - only when calculating entropy */}
-        {isCalculatingEntropy && (
-          <div className="fixed bottom-4 right-4 z-50 bg-blue-600 text-white px-3 py-1 rounded-full text-sm shadow-lg opacity-80">
-            🧠 Calculating...
-          </div>
-        )}
+        {/* Remove this indicator - we'll use the bottom one only */}
 
         {/* Remove the blocking loading screen - words load in background */}
 
         <div className="relative z-10 max-w-[2200px] mx-auto px-4 py-8">
-
-          {/* DEBUG: Test constraint addition */}
-          <div className="fixed top-10 left-10 z-50 bg-red-500 text-white p-2 rounded">
-            <button onClick={() => addToGray('X')} className="mr-2 bg-blue-500 px-2 py-1 rounded">Add X to Gray</button>
-            <button onClick={() => addToYellow('E', 1)} className="mr-2 bg-yellow-500 px-2 py-1 rounded">Add E to Yellow</button>
-            <button onClick={() => addToPosition('S', 0)} className="bg-green-500 px-2 py-1 rounded">Add S to Pos 1</button>
-          </div>
 
           {/* Word Loading Status - Non-blocking indicator */}
           {wordsLoadingStatus && (
@@ -514,25 +550,7 @@ function App() {
             </div>
           )}
 
-          {/* Calculating Indicator at Top */}
-          {isCalculating && (
-            <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 backdrop-blur-xl bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-indigo-500/20 border border-purple-400/30 rounded-2xl px-6 py-3 flex items-center space-x-3 shadow-2xl animate-fadeIn">
-              <div className="w-6 h-6 border-3 border-purple-400/30 border-t-purple-400 rounded-full animate-spin"></div>
-              <div className="flex flex-col">
-                <span className="text-purple-200 text-lg font-semibold tracking-wide">
-                  {isCalculatingEntropy ? 'Calculating optimal words...' : 'Filtering words...'}
-                </span>
-                <span className="text-purple-300/80 text-sm">
-                  {isCalculatingEntropy ? 'Information theory analysis' : 'Applying constraints'}
-                </span>
-              </div>
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                <div className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-              </div>
-            </div>
-          )}
+
 
           {/* Top Header Row - Wordle Helper left, Word Length Selector right */}
           <div className="flex justify-between items-center mb-8">
@@ -828,14 +846,38 @@ function App() {
                 </div>
               ) : (
                 <div className="text-center text-violet-300">
-                  {isCalculatingEntropy ? (
-                    <div className="flex items-center justify-center space-x-3">
-                      <div className="w-6 h-6 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin"></div>
-                      <p>Calculating optimal words...</p>
-                    </div>
-                  ) : (
-                    <p>Add constraints above to see optimal word suggestions</p>
-                  )}
+                  {(() => {
+                    const hasConstraints = knownPositions.some(pos => pos !== '') ||
+                      yellowLetters.length > 0 ||
+                      grayLetters.length > 0;
+                    
+                    if (!hasConstraints) {
+                      return <p>Add constraints above to see optimal word suggestions</p>;
+                    }
+                    
+                    return (
+                      <div className="space-y-4">
+                        <p>Ready to calculate optimal words for {filteredWords.length} possibilities</p>
+                        <button
+                          onClick={() => setShouldCalculate(true)}
+                          disabled={isCalculatingEntropy}
+                          className="px-8 py-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:from-violet-600 hover:to-fuchsia-600 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-violet-500/25 disabled:cursor-not-allowed disabled:scale-100 disabled:shadow-none"
+                        >
+                          {isCalculatingEntropy ? (
+                            <div className="flex items-center space-x-2">
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                              <span>Calculating...</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <span>🧮</span>
+                              <span>Calculate Optimal Words</span>
+                            </div>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </div>
@@ -949,7 +991,7 @@ function App() {
             </div>
           )}
 
-          {/* Enhanced Calculation Status - Bottom indicator */}
+          {/* Enhanced Calculation Status - Single bottom indicator with candidate count */}
           {isCalculating && (
             <div className="fixed bottom-6 right-6 backdrop-blur-xl bg-gradient-to-br from-purple-500/30 via-pink-500/30 to-indigo-500/30 border border-purple-400/40 rounded-2xl px-5 py-3 flex items-center space-x-3 shadow-2xl animate-fadeIn z-40">
               <div className="relative">
@@ -961,7 +1003,7 @@ function App() {
                   {isCalculatingEntropy ? 'Entropy Analysis' : 'Word Filtering'}
                 </span>
                 <span className="text-purple-300/80 text-xs">
-                  {isCalculatingEntropy ? `Analyzing ${words.length} words` : `Processing ${filteredWords.length} matches`}
+                  {isCalculatingEntropy ? `Calculating optimal words` : `Processing ${filteredWords.length} matches`}
                 </span>
               </div>
             </div>
