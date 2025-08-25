@@ -5,7 +5,6 @@ class OptimizedEntropyCalculator {
   constructor() {
     this.allWords = [];
     this.possibleAnswers = [];
-    console.log('🧠 High-Performance Entropy Calculator initialized');
   }
 
   // Ultra-fast pattern generation with bit manipulation
@@ -76,9 +75,6 @@ class OptimizedEntropyCalculator {
     if (!possibleAnswers) possibleAnswers = this.possibleAnswers;
     if (possibleAnswers.length === 0) return [];
     
-    console.log('🚀 Starting bulk entropy calculation for ' + allWords.length + ' words with ' + possibleAnswers.length + ' possible answers');
-    const startTime = performance.now();
-    
     // Pre-allocate results array for better memory performance
     const results = new Array(allWords.length);
     
@@ -94,9 +90,6 @@ class OptimizedEntropyCalculator {
     
     // Native sort is optimized in modern JS engines
     results.sort(function(a, b) { return b.entropy - a.entropy; });
-    
-    const endTime = performance.now();
-    console.log('✅ Bulk calculation completed in ' + Math.round(endTime - startTime) + 'ms');
     
     return results;
   }
@@ -174,8 +167,6 @@ class OptimizedEntropyCalculator {
     for (let i = 0; i < possibleAnswers.length; i++) {
       this.possibleAnswers.push(possibleAnswers[i].toUpperCase());
     }
-    
-    console.log('📝 Word lists updated: ' + this.allWords.length + ' total, ' + this.possibleAnswers.length + ' possible');
   }
 }
 
@@ -218,8 +209,6 @@ onmessage = function(e) {
     });
     
   } catch (error) {
-    console.error('❌ Worker error:', error);
-    
     // Send error response
     postMessage({
       type: 'error',

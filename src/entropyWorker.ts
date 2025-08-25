@@ -30,7 +30,6 @@ export class EntropyWorkerManager {
         
         const request = this.pendingRequests.get(requestId);
         if (!request) {
-          console.warn('⚠️ Received response for unknown request:', requestId);
           return;
         }
         
@@ -44,7 +43,6 @@ export class EntropyWorkerManager {
       };
       
       this.worker.onerror = (error) => {
-        console.error('❌ Worker error:', error);
         // Reject all pending requests
         this.pendingRequests.forEach((request) => {
           request.reject(new Error('Worker error occurred'));
@@ -52,7 +50,6 @@ export class EntropyWorkerManager {
         this.pendingRequests.clear();
       };
       
-      console.log('🚀 Entropy Worker initialized successfully');
     } catch (error) {
       console.error('❌ Failed to initialize worker:', error);
     }
@@ -86,7 +83,6 @@ export class EntropyWorkerManager {
 
   // Set word lists for calculations
   async setWordLists(allWords: string[], possibleAnswers: string[]): Promise<void> {
-    console.log(`📤 Sending word lists to worker: ${allWords.length} total, ${possibleAnswers.length} possible`);
     return this.sendMessage('setWordLists', { allWords, possibleAnswers });
   }
 
@@ -101,7 +97,6 @@ export class EntropyWorkerManager {
     entropy: number;
     bitsOfInfo: number;
   }>> {
-    console.log('🧮 Starting bulk entropy calculation in worker...');
     return this.sendMessage('calculateAllEntropies', { allWords, possibleAnswers });
   }
 
@@ -126,7 +121,6 @@ export class EntropyWorkerManager {
       this.worker.terminate();
       this.worker = null;
       this.pendingRequests.clear();
-      console.log('🛑 Entropy Worker terminated');
     }
   }
 

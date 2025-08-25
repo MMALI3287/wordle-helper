@@ -22,12 +22,12 @@ class OptimizedEntropyCalculator {
   private allWords: string[] = [];
   private possibleAnswers: string[] = [];
 
-  constructor() {
-    console.log('🧠 High-Performance Entropy Calculator initialized');
-  }
-
-  // Ultra-fast pattern generation with bit manipulation
+  // Ultra-fast pattern generation with bit manipulation and better error handling
   getPattern(guess: string, target: string): string {
+    if (!guess || !target || guess.length !== target.length) {
+      return '';
+    }
+    
     const result = new Array(guess.length).fill('B');
     const targetFreq = new Array(26).fill(0);
     
@@ -58,9 +58,10 @@ class OptimizedEntropyCalculator {
     return result.join('');
   }
 
-  // Optimized entropy calculation with Map for O(1) lookups
+  // Optimized entropy calculation with validation
   calculateEntropy(guessWord: string, possibleAnswers = this.possibleAnswers): number {
-    if (possibleAnswers.length <= 1) return 0;
+    if (!guessWord || typeof guessWord !== 'string') return 0;
+    if (!Array.isArray(possibleAnswers) || possibleAnswers.length <= 1) return 0;
     
     const patternCounts = new Map<string, number>();
     const upperGuess = guessWord.toUpperCase();
@@ -68,7 +69,9 @@ class OptimizedEntropyCalculator {
     // Use for-loop instead of forEach for better performance
     for (let i = 0; i < possibleAnswers.length; i++) {
       const pattern = this.getPattern(upperGuess, possibleAnswers[i]);
-      patternCounts.set(pattern, (patternCounts.get(pattern) || 0) + 1);
+      if (pattern) { // Only process valid patterns
+        patternCounts.set(pattern, (patternCounts.get(pattern) || 0) + 1);
+      }
     }
     
     // Calculate Shannon entropy with optimized math
@@ -89,9 +92,6 @@ class OptimizedEntropyCalculator {
   calculateAllEntropies(allWords = this.allWords, possibleAnswers = this.possibleAnswers) {
     if (possibleAnswers.length === 0) return [];
     
-    console.log(`🚀 Starting bulk entropy calculation for ${allWords.length} words with ${possibleAnswers.length} possible answers`);
-    const startTime = performance.now();
-    
     // Pre-allocate results array for better memory performance
     const results = new Array(allWords.length);
     
@@ -107,9 +107,6 @@ class OptimizedEntropyCalculator {
     
     // Native sort is optimized in modern JS engines
     results.sort((a, b) => b.entropy - a.entropy);
-    
-    const endTime = performance.now();
-    console.log(`✅ Bulk calculation completed in ${Math.round(endTime - startTime)}ms`);
     
     return results;
   }
@@ -176,11 +173,18 @@ class OptimizedEntropyCalculator {
     return filtered;
   }
 
-  // Set word lists for calculations
+  // Set word lists for calculations with validation
   setWordLists(allWords: string[], possibleAnswers: string[]): void {
-    this.allWords = allWords.map(w => w.toUpperCase());
-    this.possibleAnswers = possibleAnswers.map(w => w.toUpperCase());
-    console.log(`📝 Word lists updated: ${this.allWords.length} total, ${this.possibleAnswers.length} possible`);
+    if (!Array.isArray(allWords) || !Array.isArray(possibleAnswers)) {
+      throw new Error('Invalid word lists provided');
+    }
+    
+    this.allWords = allWords
+      .filter(word => typeof word === 'string' && word.length > 0)
+      .map(w => w.toUpperCase());
+    this.possibleAnswers = possibleAnswers
+      .filter(word => typeof word === 'string' && word.length > 0)
+      .map(w => w.toUpperCase());
   }
 }
 

@@ -5,58 +5,62 @@ import { getBestStartingWords } from './bestStartingWords';
 import { entropyWorker, EntropyResult } from './entropyWorker';
 import './App.css';
 
-// Consolidated word loading system - single cache layer with performance optimizations
+// Consolidated word loading system with memory management
 const wordCache = new Map<number, string[]>();
 const loadingStates = new Map<number, Promise<string[]>>();
+
+// Memory cleanup function
+const cleanupWordCache = () => {
+  // Keep only the 3 most recently used word lengths to prevent memory bloat
+  if (wordCache.size > 3) {
+    const entries = Array.from(wordCache.entries());
+    entries.sort((a, b) => a[0] - b[0]); // Sort by word length
+    const toRemove = entries.slice(0, entries.length - 3);
+    toRemove.forEach(([length]) => wordCache.delete(length));
+  }
+};
 
 const loadWordsForLength = async (length: number): Promise<string[]> => {
   // Return cached words if available
   if (wordCache.has(length)) {
-    console.log(`✅ Using cached ${length}-letter words (${wordCache.get(length)!.length} words)`);
     return wordCache.get(length)!;
   }
 
   // Return existing loading promise if already loading
   if (loadingStates.has(length)) {
-    console.log(`⏳ Waiting for existing ${length}-letter words load...`);
     return loadingStates.get(length)!;
   }
 
   // Start new loading process with performance optimizations
   const loadPromise = (async () => {
     try {
-      console.log(`🔄 Loading ${length}-letter words with optimizations...`);
-      const startTime = performance.now();
-      
       // Fetch with compression and timeout optimizations
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      
       const response = await fetch(`/words_${length}_letters.json`, {
         headers: {
           'Accept-Encoding': 'gzip, deflate, br', // Request compression
           'Cache-Control': 'max-age=3600' // Cache for 1 hour
         },
-        // Add timeout to prevent hanging
-        signal: AbortSignal.timeout(30000) // 30 second timeout
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         throw new Error(`Failed to load ${length}-letter words: ${response.statusText}`);
       }
       
-      const fetchTime = performance.now() - startTime;
-      console.log(`📡 Fetch completed in ${fetchTime.toFixed(2)}ms`);
-      
-      // Parse JSON with performance measurement
-      const parseStart = performance.now();
+      // Parse JSON
       const words: string[] = await response.json();
-      const parseTime = performance.now() - parseStart;
-      
-      console.log(`📊 JSON parse completed in ${parseTime.toFixed(2)}ms`);
-      console.log(`📋 Total loading time: ${(fetchTime + parseTime).toFixed(2)}ms for ${words.length} words`);
-      console.log(`🚀 Average: ${((fetchTime + parseTime) / words.length).toFixed(4)}ms per word`);
       
       wordCache.set(length, words);
       loadingStates.delete(length); // Clean up loading state
-      console.log(`✅ Loaded ${words.length} words of length ${length}`);
+      
+      // Cleanup old entries to prevent memory leaks
+      cleanupWordCache();
+      
       return words;
     } catch (error) {
       console.error(`❌ Error loading ${length}-letter words:`, error);
@@ -69,7 +73,7 @@ const loadWordsForLength = async (length: number): Promise<string[]> => {
   return loadPromise;
 };
 
-// Optimized word filtering - will be moved to WebAssembly worker
+// Optimized word filtering with improved duplicate letter handling
 const filterWords = (
   words: string[],
   knownPositions: string[],
@@ -86,7 +90,14 @@ const filterWords = (
       }
     }
 
-    // Check if word contains yellow letters but not in excluded positions
+    // Check if word contains gray letters
+    for (const grayLetter of grayLetters) {
+      if (upperWord.includes(grayLetter.toUpperCase())) {
+        return false;
+      }
+    }
+
+    // Check yellow letters with improved duplicate handling
     for (const { letter, excludedPositions } of yellowLetters) {
       const upperLetter = letter.toUpperCase();
 
@@ -97,16 +108,9 @@ const filterWords = (
 
       // Letter must not be in any of the excluded positions
       for (const position of excludedPositions) {
-        if (upperWord[position] === upperLetter) {
+        if (position < upperWord.length && upperWord[position] === upperLetter) {
           return false;
         }
-      }
-    }
-
-    // Check if word contains any gray letters
-    for (const grayLetter of grayLetters) {
-      if (upperWord.includes(grayLetter.toUpperCase())) {
-        return false;
       }
     }
 
@@ -201,42 +205,52 @@ function App() {
   // Combined calculating state for the indicator
   const isCalculating = isCalculatingEntropy;
 
-  // Load words when word length changes - now truly async and non-blocking
+  // Load words when word length changes with improved error handling
   useEffect(() => {
     const loadWords = async () => {
       setWordsLoadingStatus(`Loading ${wordLength}-letter words...`);
-      console.log(`🔄 Background loading ${wordLength}-letter words...`);
 
       try {
         // Start loading words in background - UI remains interactive
         const newWords = await loadWordsForLength(wordLength);
-        console.log(`✅ Background loaded ${newWords.length} words of length ${wordLength}`);
+        
+        // Validate loaded words
+        if (!Array.isArray(newWords) || newWords.length === 0) {
+          throw new Error(`No words found for length ${wordLength}`);
+        }
+        
         setWords(newWords);
         setWordsLoadingStatus('');
 
         // Initialize worker with word list for entropy calculations (when needed)
         if (newWords.length > 0) {
-          await entropyWorker.setWordLists(newWords, newWords);
+          try {
+            await entropyWorker.setWordLists(newWords, newWords);
+          } catch (workerError) {
+            console.warn('Worker initialization failed, entropy calculations will be disabled:', workerError);
+          }
         }
 
       } catch (error) {
         console.error('❌ Error loading words:', error);
         setWords([]);
-        setWordsLoadingStatus('Failed to load words');
+        setWordsLoadingStatus(`Failed to load ${wordLength}-letter words. Please try again.`);
       }
     };
 
     loadWords();
     setKnownPositions(new Array(wordLength).fill(''));
-  }, [wordLength]);  // Removed showLoading, hideLoading - no blocking UI  // Simple word filtering - instant results
+  }, [wordLength]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      // Cleanup worker when component unmounts
+      entropyWorker.terminate();
+    };
+  }, []);  // Simple word filtering - instant results
   const filteredWords = useMemo(() => {
-    console.log(`🔍 Filtering ${words.length} words with constraints:`, {
-      knownPositions: knownPositions.map((pos, i) => pos ? `${i + 1}:${pos}` : null).filter(Boolean),
-      yellowLetters: yellowLetters.map(y => `${y.letter}(not in ${y.excludedPositions.map(p => p + 1).join(',')})`),
-      grayLetters
-    });
     const result = filterWords(words, knownPositions, yellowLetters, grayLetters);
-    console.log(`✅ Found ${result.length} matching words:`, result.slice(0, 5));
     return result;
   }, [words, knownPositions, yellowLetters, grayLetters]);
 
@@ -252,7 +266,6 @@ function App() {
         // No constraints = show starting words, no entropy calculation needed
         setEntropyResults([]);
         setIsCalculatingEntropy(false);
-        console.log('🎯 No constraints - showing starting words instead of calculating entropy');
         return;
       }
 
@@ -264,25 +277,39 @@ function App() {
 
       try {
         setIsCalculatingEntropy(true);
-        console.log('🚀 Starting BACKGROUND Web Worker entropy calculation (user has constraints)');
 
         // Use filtered words as possible answers and calculate entropy for all words
         const possibleAnswers = filteredWords.length > 0 ? filteredWords : words;
         
+        // Validate inputs before sending to worker
+        if (!Array.isArray(words) || words.length === 0 || 
+            !Array.isArray(possibleAnswers) || possibleAnswers.length === 0) {
+          setEntropyResults([]);
+          return;
+        }
+        
         // Send word lists to worker
         await entropyWorker.setWordLists(words, possibleAnswers);
         
-        // Calculate entropy for all words
-        const results = await entropyWorker.calculateAllEntropies(words, possibleAnswers);
+        // Calculate entropy for all words with timeout
+        const results = await Promise.race([
+          entropyWorker.calculateAllEntropies(words, possibleAnswers),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Entropy calculation timeout')), 60000)
+          )
+        ]);
         
-        // Take top 20 results
-        setEntropyResults(results.slice(0, 20));
-        
-        console.log('✅ BACKGROUND Web Worker entropy calculation completed:', results.length, 'results');
+        // Validate results
+        if (Array.isArray(results) && results.length > 0) {
+          setEntropyResults(results.slice(0, 20));
+        } else {
+          setEntropyResults([]);
+        }
         
       } catch (error) {
         console.error('❌ Error in Web Worker entropy calculation:', error);
         setEntropyResults([]);
+        // Could implement fallback calculation here if needed
       } finally {
         setIsCalculatingEntropy(false);
       }
@@ -309,7 +336,6 @@ function App() {
     }
 
     // Get pre-computed starting words for current word length
-    console.log(`🎯 Showing pre-computed starting words for ${wordLength}-letter words`);
     return getBestStartingWords(wordLength);
   }, [wordLength, knownPositions, yellowLetters, grayLetters]);
 
@@ -326,12 +352,25 @@ function App() {
   };
 
   const addToYellow = useCallback((letter: string, sourcePosition?: number) => {
+    // Validate input
+    if (!letter || typeof letter !== 'string' || letter.length !== 1) {
+      return;
+    }
+    
+    const upperLetter = letter.toUpperCase();
+    if (!/^[A-Z]$/.test(upperLetter)) {
+      return;
+    }
+    
     setYellowLetters(prev => {
-      const existingIndex = prev.findIndex(item => item.letter === letter);
+      const existingIndex = prev.findIndex(item => item.letter === upperLetter);
       if (existingIndex >= 0) {
         // Add the new excluded position to existing entry
         const currentPositions = prev[existingIndex].excludedPositions;
-        const newPositions = sourcePosition !== undefined && !currentPositions.includes(sourcePosition)
+        const newPositions = sourcePosition !== undefined && 
+                             sourcePosition >= 0 && 
+                             sourcePosition < wordLength &&
+                             !currentPositions.includes(sourcePosition)
           ? [...currentPositions, sourcePosition]
           : currentPositions;
 
@@ -341,38 +380,65 @@ function App() {
         };
         const newArray = [...prev];
         newArray[existingIndex] = updatedItem;
-        triggerLetterAnimation(`yellow-${letter}-${sourcePosition}`);
+        triggerLetterAnimation(`yellow-${upperLetter}-${sourcePosition}`);
         return newArray;
       } else {
         // Create new entry
-        triggerLetterAnimation(`yellow-${letter}-${sourcePosition}`);
+        triggerLetterAnimation(`yellow-${upperLetter}-${sourcePosition}`);
         return [...prev, {
-          letter,
-          excludedPositions: sourcePosition !== undefined ? [sourcePosition] : []
+          letter: upperLetter,
+          excludedPositions: sourcePosition !== undefined && 
+                             sourcePosition >= 0 && 
+                             sourcePosition < wordLength 
+            ? [sourcePosition] 
+            : []
         }];
       }
     });
-  }, []);
+  }, [wordLength]);
 
   const addToGray = useCallback((letter: string) => {
+    // Validate input
+    if (!letter || typeof letter !== 'string' || letter.length !== 1) {
+      return;
+    }
+    
+    const upperLetter = letter.toUpperCase();
+    if (!/^[A-Z]$/.test(upperLetter)) {
+      return;
+    }
+    
     setGrayLetters(prev => {
-      if (!prev.includes(letter)) {
-        triggerLetterAnimation(`gray-${letter}`);
-        return [...prev, letter];
+      if (!prev.includes(upperLetter)) {
+        triggerLetterAnimation(`gray-${upperLetter}`);
+        return [...prev, upperLetter];
       }
       return prev;
     });
   }, []);
 
   const addToPosition = useCallback((letter: string, position: number) => {
+    // Validate input
+    if (!letter || typeof letter !== 'string' || letter.length !== 1) {
+      return;
+    }
+    
+    const upperLetter = letter.toUpperCase();
+    if (!/^[A-Z]$/.test(upperLetter)) {
+      return;
+    }
+    
+    if (position < 0 || position >= wordLength) {
+      return;
+    }
+    
     setKnownPositions(prev => {
       const newPositions = [...prev];
-      newPositions[position] = letter.toUpperCase(); // Ensure uppercase
-      triggerLetterAnimation(`position-${position}-${letter}`);
-      console.log('🎯 Added to position', position + 1, ':', letter.toUpperCase(), 'Full array:', newPositions);
+      newPositions[position] = upperLetter;
+      triggerLetterAnimation(`position-${position}-${upperLetter}`);
       return newPositions;
     });
-  }, []);
+  }, [wordLength]);
 
   const removeFromYellow = useCallback((letter: string) => {
     setYellowLetters(prev => prev.filter(item => item.letter !== letter));
@@ -676,13 +742,8 @@ function App() {
           </div>
 
           {/* CRITICAL: Calculated Words Sorted by Information Bits - Always Show When Available */}
-          {(() => {
-            console.log('🎨 Render check - entropyResults.length:', entropyResults.length, 'Array:', entropyResults.slice(0, 2));
-            console.log('🎨 Words loaded:', words.length, 'Filtered words:', filteredWords.length);
-            return null;
-          })()}
-          {/* TEMP: Always show section for debugging */}
-          <div className="backdrop-blur-xl bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-purple-500/10 border border-violet-400/20 rounded-3xl shadow-2xl p-8 mb-6 relative overflow-hidden group hover:scale-[1.01] transition-all duration-500">
+          {entropyResults.length > 0 && (
+            <div className="backdrop-blur-xl bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-purple-500/10 border border-violet-400/20 rounded-3xl shadow-2xl p-8 mb-6 relative overflow-hidden group hover:scale-[1.01] transition-all duration-500">
             <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-fuchsia-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative z-10">
               <div className="flex items-center justify-center mb-8">
@@ -690,7 +751,7 @@ function App() {
                   🧠
                 </div>
                 <h2 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-violet-300 via-fuchsia-300 to-purple-300 ml-4 tracking-wide font-['Inter']">
-                  Optimal Next Words (Debug: {entropyResults.length} words)
+                  Optimal Next Words
                 </h2>
               </div>
               <div className="text-center mb-6">
@@ -726,11 +787,12 @@ function App() {
                 </div>
               ) : (
                 <div className="text-center text-violet-300">
-                  <p>No words calculated yet. Debug info: words={words.length}, filtered={filteredWords.length}</p>
+                  <p>Calculating optimal words...</p>
                 </div>
               )}
             </div>
           </div>
+          )}
 
           {/* Starting Word Suggestions - Always show when no constraints */}
           {startingWordSuggestions.length > 0 && (
