@@ -404,6 +404,7 @@ function App() {
       } else {
         // Create new entry
         triggerLetterAnimation(`yellow-${upperLetter}-${sourcePosition}`);
+        console.log('🟨 Added to yellow letters:', upperLetter, 'Excluded positions:', sourcePosition !== undefined && sourcePosition >= 0 && sourcePosition < wordLength ? [sourcePosition] : []);
         return [...prev, {
           letter: upperLetter,
           excludedPositions: sourcePosition !== undefined && 
@@ -430,6 +431,7 @@ function App() {
     setGrayLetters(prev => {
       if (!prev.includes(upperLetter)) {
         triggerLetterAnimation(`gray-${upperLetter}`);
+        console.log('🔥 Added to gray letters:', upperLetter, 'New array:', [...prev, upperLetter]);
         return [...prev, upperLetter];
       }
       return prev;
@@ -455,6 +457,7 @@ function App() {
       const newPositions = [...prev];
       newPositions[position] = upperLetter;
       triggerLetterAnimation(`position-${position}-${upperLetter}`);
+      console.log('🟩 Added to position', position, ':', upperLetter, 'Full array:', newPositions);
       return newPositions;
     });
   }, [wordLength]);
@@ -495,6 +498,13 @@ function App() {
         {/* Remove the blocking loading screen - words load in background */}
 
         <div className="relative z-10 max-w-[2200px] mx-auto px-4 py-8">
+
+          {/* DEBUG: Test constraint addition */}
+          <div className="fixed top-10 left-10 z-50 bg-red-500 text-white p-2 rounded">
+            <button onClick={() => addToGray('X')} className="mr-2 bg-blue-500 px-2 py-1 rounded">Add X to Gray</button>
+            <button onClick={() => addToYellow('E', 1)} className="mr-2 bg-yellow-500 px-2 py-1 rounded">Add E to Yellow</button>
+            <button onClick={() => addToPosition('S', 0)} className="bg-green-500 px-2 py-1 rounded">Add S to Pos 1</button>
+          </div>
 
           {/* Word Loading Status - Non-blocking indicator */}
           {wordsLoadingStatus && (
@@ -765,6 +775,13 @@ function App() {
             const hasConstraints = knownPositions.some(pos => pos !== '') ||
               yellowLetters.length > 0 ||
               grayLetters.length > 0;
+            console.log('🎨 UI Render constraint check:', {
+              hasConstraints,
+              knownPositions: knownPositions.filter(p => p),
+              yellowLettersCount: yellowLetters.length,
+              grayLettersCount: grayLetters.length,
+              grayLetters
+            });
             return hasConstraints;
           })() && (
             <div className="backdrop-blur-xl bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-purple-500/10 border border-violet-400/20 rounded-3xl shadow-2xl p-8 mb-6 relative overflow-hidden group hover:scale-[1.01] transition-all duration-500">
