@@ -262,6 +262,13 @@ function App() {
         yellowLetters.length > 0 ||
         grayLetters.length > 0;
 
+      console.log('🎯 Constraint check:', {
+        hasConstraints,
+        knownPositions: knownPositions.filter(p => p),
+        yellowLetters: yellowLetters.length,
+        grayLetters: grayLetters.length
+      });
+
       if (!hasConstraints) {
         // No constraints = show starting words, no entropy calculation needed
         setEntropyResults([]);
@@ -269,7 +276,7 @@ function App() {
         return;
       }
 
-      if (words.length === 0 || filteredWords.length === 0) {
+      if (words.length === 0) {
         setEntropyResults([]);
         setIsCalculatingEntropy(false);
         return;
@@ -279,7 +286,8 @@ function App() {
         setIsCalculatingEntropy(true);
 
         // Use filtered words as possible answers and calculate entropy for all words
-        const possibleAnswers = filteredWords.length > 0 ? filteredWords : words;
+        // If no words match current constraints, use a larger subset for better suggestions
+        const possibleAnswers = filteredWords.length > 0 ? filteredWords : words.slice(0, 1000);
         
         // Validate inputs before sending to worker
         if (!Array.isArray(words) || words.length === 0 || 
@@ -288,8 +296,17 @@ function App() {
           return;
         }
         
+        // Check if worker is ready
+        if (!entropyWorker.isReady()) {
+          console.warn('Entropy worker not ready, skipping calculation');
+          setEntropyResults([]);
+          return;
+        }
+        
         // Send word lists to worker
         await entropyWorker.setWordLists(words, possibleAnswers);
+        
+        console.log('🧮 About to calculate entropy for', words.length, 'words with', possibleAnswers.length, 'possible answers');
         
         // Calculate entropy for all words with timeout
         const results = await Promise.race([
@@ -298,6 +315,8 @@ function App() {
             setTimeout(() => reject(new Error('Entropy calculation timeout')), 60000)
           )
         ]);
+        
+        console.log('✅ Entropy calculation completed with', results?.length || 0, 'results');
         
         // Validate results
         if (Array.isArray(results) && results.length > 0) {
@@ -741,8 +760,13 @@ function App() {
             </div>
           </div>
 
-          {/* CRITICAL: Calculated Words Sorted by Information Bits - Always Show When Available */}
-          {entropyResults.length > 0 && (
+          {/* CRITICAL: Calculated Words Sorted by Information Bits - Show when constraints exist */}
+          {(() => {
+            const hasConstraints = knownPositions.some(pos => pos !== '') ||
+              yellowLetters.length > 0 ||
+              grayLetters.length > 0;
+            return hasConstraints;
+          })() && (
             <div className="backdrop-blur-xl bg-gradient-to-br from-violet-500/10 via-fuchsia-500/10 to-purple-500/10 border border-violet-400/20 rounded-3xl shadow-2xl p-8 mb-6 relative overflow-hidden group hover:scale-[1.01] transition-all duration-500">
             <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 via-fuchsia-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
             <div className="relative z-10">
@@ -787,7 +811,14 @@ function App() {
                 </div>
               ) : (
                 <div className="text-center text-violet-300">
-                  <p>Calculating optimal words...</p>
+                  {isCalculatingEntropy ? (
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="w-6 h-6 border-2 border-violet-400/30 border-t-violet-400 rounded-full animate-spin"></div>
+                      <p>Calculating optimal words...</p>
+                    </div>
+                  ) : (
+                    <p>Add constraints above to see optimal word suggestions</p>
+                  )}
                 </div>
               )}
             </div>
